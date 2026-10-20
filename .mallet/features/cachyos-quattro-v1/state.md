@@ -14,4 +14,5 @@
 
 ## Blockers
 <!-- - [ ] <description> (check off when resolved) -->
+- [ ] `main` has no server-side protection: GitHub Free blocks rulesets and branch protection on private repos (API 403). Until the repo goes public, `.claude/settings.json` deny rules and a local `.git/hooks/pre-push` guard it. When the repo is made public, add a ruleset on `main`: block deletion, block non-fast-forward pushes, require a pull request, repo owner on the bypass list.
 - [ ] Golden VM images need a manual CachyOS install from the ISO (Calamares) for each of Limine+LUKS and Limine plain; the user runs these once (task 03).
