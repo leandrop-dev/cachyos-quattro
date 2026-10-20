@@ -1,0 +1,4 @@
+# First three ranked servers from a CachyOS host (cachyos-rate-mirrors output).
+Server = https://mirror.krfoss.org/cachyos/repo/$arch_v3/$repo
+Server = https://mirror5.krfoss.org/cachyos/repo/$arch_v3/$repo
+Server = https://mirror.bali0531.hu/repo/$arch_v3/$repo

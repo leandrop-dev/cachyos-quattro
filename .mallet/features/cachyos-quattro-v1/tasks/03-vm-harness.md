@@ -20,6 +20,7 @@ Add a QEMU/OVMF harness that runs each test on a disposable overlay of a golden 
    - exits non-zero on any failure and keeps the overlay for inspection; deletes it on success unless `KEEP=1`.
 5. Write `tests/vm/scenarios/smoke.sh`: asserts `grep -q '^ID=cachyos' /etc/os-release` and `systemctl is-system-running --wait` returns `running` or `degraded`.
 6. Run `tests/vm/run.sh limine-luks smoke` and `tests/vm/run.sh limine-plain smoke`; both pass.
+7. Replace the synthetic fixture files listed in `tests/fixtures/README.md` (`etc/default/limine`, `proc/cmdline`, the LUKS `etc/mkinitcpio.conf`) with copies from each golden image (UUIDs replaced by all-zero placeholders), update the README's source column, and run `make check`.
 
 ## TDD Checklist
 - [ ] Write failing test (`smoke` scenario against a missing image fails cleanly)

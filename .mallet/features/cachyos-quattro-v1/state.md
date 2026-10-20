@@ -11,6 +11,9 @@
 - 2026-10-20: [firm] Bash for all runtime code; TSV ledger (no jq dependency before Omarchy is installed).
 - 2026-10-20: [tentative] Omarchy keeps its Plymouth theme and plymouthd.conf, faillock.conf, cups and skel .bashrc overrides; CachyOS keeps os-release and nsswitch.conf — re-check in task 04.
 - 2026-10-20: [tentative] Migration gate uses a filtered OMARCHY_PATH view rather than temporary markers; fall back to an own run loop if the view breaks migrations (task 07).
+- 2026-10-21: [firm] Fixtures are built from pristine package files plus marked synthetic files, not from the development machine's boot config — that machine runs a desktop whose installer rewrites `/etc/default/limine` and adds a HOOKS-replacing mkinitcpio drop-in. Task 03 replaces the synthetic files from the golden images.
+- 2026-10-21: [firm] The `btrfs-overlayfs` / `sd-btrfs-overlayfs` initcpio hooks ship in `limine-mkinitcpio-hook` 1.40.0 (`usr/lib/initcpio/install/`), not in `limine-snapper-sync` as stated in #74; task 15 corrected.
+- 2026-10-21: [firm] `limine-mkinitcpio-hook` 1.40.0 itself installs `/usr/local/bin/mkinitcpio` and `/etc/pacman.d/hooks/90-mkinitcpio-install.hook`; our `/usr/local/bin` stubs must not collide with that path, and txn-check (task 06) must treat these as CachyOS-owned.
 
 ## Blockers
 <!-- - [ ] <description> (check off when resolved) -->

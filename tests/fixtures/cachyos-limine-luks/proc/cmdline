@@ -1,0 +1,1 @@
+BOOT_IMAGE=/0123456789abcdef0123456789abcdef/linux-cachyos/vmlinuz-linux-cachyos quiet nowatchdog splash rd.luks.uuid=00000000-0000-0000-0000-000000000000 root=/dev/mapper/luks-00000000-0000-0000-0000-000000000000 rootflags=subvol=/@ rw
