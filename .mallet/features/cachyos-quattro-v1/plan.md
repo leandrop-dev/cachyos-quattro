@@ -28,7 +28,7 @@ Every runtime script honours `CQ_ROOT` (default empty) as a path prefix so unit 
 
 ## Tasks
 - [x] 01-repo-bootstrap — README, LICENSE (MIT), .gitignore as the first commit on main [deps: —] [parallel: no]
-- [ ] 02-unit-test-harness — bats + shellcheck via Makefile and a CI workflow [deps: 01] [parallel: yes]
+- [x] 02-unit-test-harness — bats + shellcheck via Makefile and a CI workflow [deps: 01] [parallel: yes]
 - [ ] 03-vm-harness — QEMU/OVMF golden images (Limine ± LUKS) and a disposable-overlay test runner [deps: 01] [parallel: yes]
 - [ ] 04-conflict-audit-and-ledger — ledger generator, 4.0.6 baseline ledger and docs/conflicts.md [deps: 01] [parallel: yes]
 - [ ] 05-guard-package — PKGBUILD with NoExtract drop-in, guard-hook mask, identity restore hook and stubs [deps: 02, 04] [parallel: no]

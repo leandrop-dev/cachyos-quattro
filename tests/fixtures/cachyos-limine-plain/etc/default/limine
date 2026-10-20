@@ -1,0 +1,8 @@
+# SYNTHETIC: stands in for the CachyOS installer's file until task 03 copies
+# the real one from the golden image. Values are placeholders.
+TARGET_OS_NAME="CachyOS"
+ESP_PATH="/boot"
+KERNEL_CMDLINE[default]+="quiet nowatchdog splash root=UUID=00000000-0000-0000-0000-000000000000 rootflags=subvol=/@ rw"
+ENABLE_UKI=no
+BOOT_ORDER="*, *lts, *fallback, Snapshots"
+MAX_SNAPSHOT_ENTRIES=auto
