@@ -1,0 +1,8 @@
+/build/
+/package/pkg/
+/package/src/
+*.pkg.tar.zst
+/tests/vm/images/
+/tests/vm/run/
+*.qcow2
+*.log
