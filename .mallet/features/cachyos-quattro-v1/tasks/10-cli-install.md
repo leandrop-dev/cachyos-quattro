@@ -34,3 +34,4 @@ Implement `cachyos-quattro install`, a resumable install of Omarchy v4 that ends
 
 ## Notes
 `omarchy update` and plain `pacman -Syu` both stay safe after install: the guard hook is masked, NoExtract/txn-check/identity/verify hooks fire on every transaction, and migrations go through the gate. `--overwrite '/usr/share/omarchy/*'` in `omarchy-update-system-pkgs` does not interact with NoExtract.
+- The transaction check (task 06) aborts any transaction that installs an `[omarchy]` package shipping an unreviewed file under its boot-sensitive paths. In 4.0.6 none of `omarchy-base.packages` does, but the hardware steps `intel/ipu7-camera.sh`, `dell-xps13-ptl-speaker-firmware.sh` and `fix-tuxedo-backlight.sh` install such packages (docs/conflicts.md #17). On matching hardware install stops at that step with the check's message; report it as "needs a ledger review" rather than a generic failure.

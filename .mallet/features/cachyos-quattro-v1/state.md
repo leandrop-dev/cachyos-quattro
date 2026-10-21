@@ -27,6 +27,8 @@
 - 2026-10-21: [firm] Stubbed commands are listed in `package/stubbed-commands.txt`: `omarchy-channel-set` replaces `omarchy-version-channel` (read-only), `omarchy-refresh-plymouth` added from the brief; `omarchy-snapshot` is refused only for `restore`.
 - 2026-10-21: [tentative] Keep the pacman `Include` fail-closed: removing cachyos-quattro while `/etc/pacman.conf` still includes its drop-in stops pacman (verified on limine-plain) instead of letting Omarchy's boot files in. `pre_remove` warns; `cachyos-quattro uninstall` removes the Include before the package.
 
+- 2026-10-21: [firm] The transaction check inspects every package pacman installs from `[omarchy]`, not only `omarchy`/`omarchy-settings`; unreviewed boot-sensitive files in other `[omarchy]` packages (docs/conflicts.md #17) abort until reviewed. It is path-based; content changes in reviewed paths are left to the upstream-diff CI.
+
 ## Blockers
 <!-- - [ ] <description> (check off when resolved) -->
 - [ ] `main` has no server-side protection: GitHub Free blocks rulesets and branch protection on private repos (API 403). Until the repo goes public, `.claude/settings.json` deny rules and a local `.git/hooks/pre-push` guard it. When the repo is made public, add a ruleset on `main`: block deletion, block non-fast-forward pushes, require a pull request, repo owner on the bypass list.

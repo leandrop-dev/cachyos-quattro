@@ -120,3 +120,4 @@ on success too.
 | Date | Omarchy | CachyOS ISO | Image | Scenario | Result |
 |---|---|---|---|---|---|
 | 2026-10-21 | none (guard package 0.1.0-1 only) | 260809 | limine-plain | guard-package | pass |
+| 2026-10-21 | none (fake omarchy-settings from a local repo) | 260809 | limine-plain | txn-check | pass |
