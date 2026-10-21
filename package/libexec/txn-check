@@ -38,7 +38,8 @@ done <<<"$input"
   say "cannot read the ledger $ledger; transaction aborted."
   exit 1
 }
-reviewed=$(grep -v '^#' "$ledger" | cut -f1)
+# path<TAB>verdict for every reviewed path.
+reviewed=$(grep -v '^#' "$ledger" | cut -f1,2)
 
 # pacman's own command line, to tell `pacman -U <file>` apart from a sync transaction.
 from_file() {
@@ -103,12 +104,19 @@ if ((${#candidates[@]})); then
     shipped=$(bsdtar -tf "$pkgfile")
     for path in "${paths[@]}"; do
       grep -qxF -e "$path" <<<"$shipped" || continue
-      grep -qxF -e "$path" <<<"$reviewed" || problem "unreviewed Omarchy file $path (package $name)"
+      verdict=$(awk -F'\t' -v p="$path" '$1 == p { print $2; exit }' <<<"$reviewed")
+      if [[ -z $verdict ]]; then
+        problem "unreviewed Omarchy file $path (package $name)"
+      elif [[ $verdict == noextract ]]; then
+        # pacman leaves NoExtract'd paths out of Path hook targets, so this one arriving
+        # means the NoExtract drop-in is not in effect.
+        problem "$path (package $name) is NoExtract in the ledger, but pacman would install it; is 'Include = /etc/pacman.d/cachyos-quattro.conf' missing from [options] in /etc/pacman.conf?"
+      fi
     done
   done <<<"$resolved"
 fi
 
 ((problems)) || exit 0
-say "transaction aborted: the files above are not in the cachyos-quattro ledger."
+say "transaction aborted: the Omarchy files above are unreviewed, or would bypass NoExtract."
 say "Review them first; to install anyway: sudo env CQ_TXN_ALLOW=1 pacman ..."
 exit 1

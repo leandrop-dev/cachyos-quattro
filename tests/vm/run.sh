@@ -5,7 +5,9 @@
 #
 # Copies the working tree to ~/cq on the guest, runs tests/vm/scenarios/<scenario>.sh
 # there, reboots (typing the LUKS passphrase on *-luks* images), then runs
-# <scenario>.after-reboot.sh if it exists, or scenarios/smoke.sh otherwise.
+# <scenario>.after-reboot.sh if it exists, or scenarios/smoke.sh otherwise, and finally
+# <scenario>.host.sh on the host, if it exists, with VM_QMP, VM_PORT, VM_IMAGE and VM_SHOTS
+# (a directory for screendumps) set.
 # KEEP=1 keeps the overlay even when the run passes.
 
 set -euo pipefail
@@ -44,6 +46,14 @@ if [[ -f $after ]]; then
     vm_die "after-reboot check for $scenario failed"
 else
   vm_ssh "$port" "cd ~/cq && bash tests/vm/scenarios/smoke.sh" || vm_die "post-reboot smoke check failed"
+fi
+
+host=$VM_DIR/scenarios/$scenario.host.sh
+if [[ -f $host ]]; then
+  vm_log "running host checks for $scenario"
+  mkdir -p "$RUN_DIR/$run_id-shots"
+  VM_QMP=$qmp VM_PORT=$port VM_IMAGE=$image VM_SHOTS=$RUN_DIR/$run_id-shots bash "$host" ||
+    vm_die "host check for $scenario failed"
 fi
 
 passed=1

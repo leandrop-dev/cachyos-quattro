@@ -34,6 +34,8 @@
 
 - 2026-10-21: [firm] Qt 6.12 needs no bridge for 4.0.6: #14553 was cherry-picked into v4.0.5 (`bfac6650`), so the shell qualifies `Commons.Color`, and VM screendumps on qt6-declarative 6.12.0 show correct colours in the desktop, menu and lock screen (task 16 notes). Supersedes the option (a) decision above.
 
+- 2026-10-21: [firm] pacman Path hooks (task 13 step 8, hostile-release scenario): targets include files of packages pulled in as dependencies, but not NoExtract'd paths (the upgraded omarchy-settings' omarchy_hooks.conf was absent while the Include was in effect). txn-check now aborts when a `noextract` path from an Omarchy package arrives, because that only happens when the NoExtract drop-in is not in effect (verified: with the Include removed, all 11 noextract files are named and nothing installs).
+
 ## Blockers
 <!-- - [ ] <description> (check off when resolved) -->
 - [ ] `main` has no server-side protection: GitHub Free blocks rulesets and branch protection on private repos (API 403). Until the repo goes public, `.claude/settings.json` deny rules and a local `.git/hooks/pre-push` guard it. When the repo is made public, add a ruleset on `main`: block deletion, block non-fast-forward pushes, require a pull request, repo owner on the bypass list.
