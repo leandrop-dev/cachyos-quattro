@@ -1,5 +1,5 @@
 # Task: other-bootloaders
-Status: pending
+Status: deferred (phase 2 roadmap, 2026-10-21)
 Deps: 13
 
 ## Goal
