@@ -29,3 +29,4 @@ Open a review issue automatically for every new Omarchy release, with a diff aga
 
 ## Notes
 Creating issues on the GitHub repo is outward-facing; the first `workflow_dispatch` run is done with the user's confirmation.
+- Also flag, in each new release: calls to `omarchy-migrate` or to a name in `package/stubbed-commands.txt` from scripts that `export PATH="$OMARCHY_PATH/bin:$PATH"` (4.0.6: `omarchy-apply-system`, `omarchy-apply-hardware`, `omarchy-provision-user`, `omarchy-provision-owner`), since there the gate and stubs are bypassed; and changes to upstream `bin/omarchy-migrate`, whose loop the gate copies.

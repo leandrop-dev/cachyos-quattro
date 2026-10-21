@@ -1,0 +1,7 @@
+Reviewed replacements for Omarchy migrations, installed to
+/usr/share/cachyos-quattro/migrations/.
+
+Each file is named exactly like the upstream migration it replaces (for example
+1789325478.sh) and has a `replace` row in ledger/migrations.tsv keyed by the
+upstream file's sha256. The gate (omarchy-migrate) runs the file here instead of
+the upstream one, with `bash -euo pipefail`, and then marks the migration done.

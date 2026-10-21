@@ -72,6 +72,12 @@ Concretely:
    `omarchy:requires-sudo=true` are held: never run and never marked. The real
    `omarchy-migrate` runs against a filtered view, so no temporary markers exist
    to be orphaned. Unreviewed unprivileged migrations run.
+   *Amended 2026-10-21 (task 07):* the gate runs the allowed migrations itself with
+   upstream's loop body (`OMARCHY_PATH=<real path> bash -euo pipefail <file>`, then
+   the marker) instead of running the real `omarchy-migrate` against a filtered
+   view. Migration `1786098807` links `$OMARCHY_PATH/default/...` into the home
+   directory, which under a view would point into a deleted temporary directory.
+   Held migrations still get no marker.
 5. `/usr/local/bin` stubs for commands that rewrite boot, pacman or identity
    configuration. They explain and refuse; they are user experience, not the
    protection boundary. Plymouth theme commands stay allowed, because an

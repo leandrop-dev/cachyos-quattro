@@ -28,12 +28,15 @@ package() {
   ln -s /dev/null "$pkgdir/etc/pacman.d/hooks/00-omarchy-update-guard.hook"
 
   install -Dm644 "$startdir"/hooks/*.hook -t "$pkgdir/usr/share/libalpm/hooks/"
-  install -Dm755 "$startdir"/libexec/{restore-identity,stub,txn-check} -t "$pkgdir/usr/lib/cachyos-quattro/"
+  install -Dm755 "$startdir"/libexec/{migrate-gate,restore-identity,stub,txn-check} -t "$pkgdir/usr/lib/cachyos-quattro/"
 
   install -d "$pkgdir/usr/local/bin"
   while read -r name; do
     ln -s /usr/lib/cachyos-quattro/stub "$pkgdir/usr/local/bin/$name"
   done < <(grep -v '^#' "$startdir/stubbed-commands.txt")
+  ln -s /usr/lib/cachyos-quattro/migrate-gate "$pkgdir/usr/local/bin/omarchy-migrate"
+
+  install -Dm644 "$startdir"/migrations/* -t "$pkgdir/usr/share/cachyos-quattro/migrations/"
 
   install -Dm644 "$repo"/ledger/*.tsv -t "$pkgdir/usr/share/cachyos-quattro/ledger/"
   install -Dm644 "$repo/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"

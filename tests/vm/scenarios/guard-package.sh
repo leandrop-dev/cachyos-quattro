@@ -40,6 +40,14 @@ for shell_cmd in "command -v omarchy-refresh-limine" "sudo sh -c 'command -v oma
   [[ $where == /usr/local/bin/omarchy-refresh-limine ]] || fail "$shell_cmd found $where"
   echo "$shell_cmd -> $where"
 done
+echo "== migration gate on PATH (shell and systemd user manager, which runs the login notifier)"
+[[ $(command -v omarchy-migrate) == /usr/local/bin/omarchy-migrate ]] || fail "omarchy-migrate is not the gate"
+user_path=$(systemctl --user show-environment | sed -n 's/^PATH=//p')
+[[ -n $user_path ]] || user_path=$(systemd-path search-binaries-default)
+[[ $(PATH=$user_path command -v omarchy-migrate) == /usr/local/bin/omarchy-migrate ]] ||
+  fail "systemd user PATH ($user_path) does not find the gate first"
+echo "systemd user PATH: $user_path"
+omarchy-migrate --status || fail "gate --status failed without Omarchy installed"
 if out=$(sudo omarchy-snapshot restore 2>&1); then
   fail "omarchy-snapshot restore was not refused"
 fi

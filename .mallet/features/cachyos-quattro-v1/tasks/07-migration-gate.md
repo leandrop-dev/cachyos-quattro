@@ -1,5 +1,5 @@
 # Task: migration-gate
-Status: pending
+Status: done
 Deps: 05
 
 ## Goal
@@ -26,11 +26,20 @@ Shadow omarchy-migrate with a gate that runs reviewed migrations by verdict and 
 4. `make check` passes; `makepkg -f` builds.
 
 ## TDD Checklist
-- [ ] Write failing test
-- [ ] Confirm test fails (red)
-- [ ] Implement
-- [ ] Confirm test passes (green)
-- [ ] Confirm no regressions
+- [x] Write failing test
+- [x] Confirm test fails (red)
+- [x] Implement
+- [x] Confirm test passes (green)
+- [x] Confirm no regressions
 
 ## Notes
 Verified during planning: `omarchy-update` and `omarchy-migrate-notify` call `omarchy-migrate` by name (no absolute-path callers in 4.0.6), so `/usr/local/bin` precedence covers both. `omarchy-migrate` honours `OMARCHY_PATH` and `OMARCHY_MIGRATION_STATE`. If any migration breaks under the view (e.g. compares `OMARCHY_PATH` to `/usr/share/omarchy`), switch to running each allowed migration with the upstream loop body copied into the gate, and record that in state.md [tentative → firm].
+
+As built (2026-10-21):
+- The filtered OMARCHY_PATH view was dropped before writing code: migration `1786098807.sh` runs `ln -sfn "$OMARCHY_PATH/default/agents/skills/omarchy" ~/...`, which under a view would leave links into a deleted directory. The gate (`package/libexec/migrate-gate`, installed as `/usr/local/bin/omarchy-migrate`) runs allowed migrations itself with upstream's loop body and its pacman-lock wait, then upstream's notification dismiss. ADR 0001 item 4 is amended.
+- `--status` (new) prints `name<TAB>verdict<TAB>reason` for each pending migration, for `cachyos-quattro status` (task 08). Held migrations are logged once per name and sha256 to `~/.local/state/cachyos-quattro/held.log` (the gate runs as the user; nothing goes to `/var/log`).
+- Fail-closed details: a missing ledger runs nothing (exit 1); a `replace` verdict without our script, an unknown verdict, or a missing `$OMARCHY_PATH/bin` holds the migration.
+- The view tests from step 3 became: a migration sees the real OMARCHY_PATH (symlink target check), and SIGTERM mid-run leaves the interrupted migration unmarked. The fixture migrations are synthetic rather than copies of upstream files.
+- Cross-check against the real 4.0.6 tree (`build/ledger/4.0.6`, no reviews applied): the gate holds 64 and runs 56 migrations, matching `ledger/migrations.4.0.6.tsv`'s privileged column with 0 mismatches.
+- `guard-package.sh` now also checks that `omarchy-migrate` resolves to the gate in the login shell and in the systemd user manager's PATH (`/usr/local/bin:/usr/bin` on the golden image), which runs `omarchy-migrate-notify`.
+- Found while checking callers: `omarchy-apply-system`, `omarchy-apply-hardware`, `omarchy-provision-user` and `omarchy-provision-owner` `export PATH="$OMARCHY_PATH/bin:$PATH"`, so inside them `omarchy-migrate` and the stubbed names resolve to Omarchy's own copies. In 4.0.6 none of them calls one (matches are in comments only), and `env-bootstrap` prepends `$OMARCHY_PATH/bin` only on the dev channel. `omarchy-provision-user` marks every shipped migration done for the user. Task 12 watches for new calls.
