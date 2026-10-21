@@ -147,7 +147,7 @@ cache_pkg() {
   [[ $output == *"failed to init transaction"* ]]
 }
 
-@test "every Omarchy 4.0.6 file under a hook target path is in the ledger" {
+@test "every file of the reviewed release under a hook target path is in the ledger" {
   hook="$BATS_TEST_DIRNAME/../../package/hooks/04-cachyos-quattro-txn-check.hook"
   targets=$(sed -n '/^Type = Path$/,/^\[Action\]$/s/^Target = //p' "$hook")
   [ -n "$targets" ]
@@ -159,5 +159,5 @@ cache_pkg() {
       [[ $path == $pattern ]] || continue
       grep -qxF -e "$path" <<<"$reviewed" || { echo "unreviewed: $path"; false; }
     done <<<"$targets"
-  done < <(cut -f1 "$LEDGER/files.4.0.6.tsv")
+  done < <(cut -f1 "$LEDGER/files.$(reviewed_release).tsv")
 }

@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+load helpers
+
 LEDGER="$BATS_TEST_DIRNAME/../../ledger"
 
 rows() {
@@ -14,8 +16,8 @@ rows() {
   [ -z "$(rows "$LEDGER/files.tsv" | cut -f1 | sort | uniq -d)" ]
 }
 
-@test "files.tsv covers every shipped 4.0.6 file outside /etc/skel" {
-  shipped=$(awk -F'\t' '$1 !~ /^etc\/skel\// {print $1}' "$LEDGER/files.4.0.6.tsv" | sort)
+@test "files.tsv covers every file the reviewed release ships outside /etc/skel" {
+  shipped=$(awk -F'\t' '$1 !~ /^etc\/skel\// {print $1}' "$LEDGER/files.$(reviewed_release).tsv" | sort)
   reviewed=$(rows "$LEDGER/files.tsv" | awk -F'\t' '$2 != "restore" {print $1}' | sort)
   [ "$shipped" = "$reviewed" ]
 }
@@ -28,8 +30,8 @@ rows() {
   done
 }
 
-@test "migrations.tsv matches the 4.0.6 migrations by name and sha256" {
-  generated=$(cut -f1,2 "$LEDGER/migrations.4.0.6.tsv" | sort)
+@test "migrations.tsv matches the reviewed release's migrations by name and sha256" {
+  generated=$(cut -f1,2 "$LEDGER/migrations.$(reviewed_release).tsv" | sort)
   reviewed=$(rows "$LEDGER/migrations.tsv" | cut -f1,2 | sort)
   [ "$generated" = "$reviewed" ]
 }
@@ -51,6 +53,11 @@ rows() {
   done
 }
 
-@test "releases.tsv records 4.0.6 as reviewed" {
-  rows "$LEDGER/releases.tsv" | grep -qxE '4\.0\.6	[0-9-]+	reviewed'
+@test "releases.tsv records a reviewed release whose generated ledger is present" {
+  v=$(reviewed_release)
+  [ -n "$v" ]
+  for f in files packages migrations commands; do
+    [ -f "$LEDGER/$f.$v.tsv" ] || { echo "missing $f.$v.tsv"; false; }
+  done
+  [ -f "$LEDGER/install.$v.txt" ]
 }

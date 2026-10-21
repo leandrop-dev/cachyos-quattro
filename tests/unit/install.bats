@@ -59,7 +59,7 @@ stub_phases() {
   [[ $output == *"unexpected line in hardware/all.sh"* ]]
 }
 
-@test "the shipped ledger reviews every step of Omarchy 4.0.6's installer" {
+@test "the shipped ledger's install steps plan cleanly with their verdicts" {
   # Built from the ledger itself: every reviewed script, in its own group's all.sh.
   local group
   for group in config hardware login post-install; do
@@ -68,8 +68,8 @@ stub_phases() {
   done
   run cq_install_plan_steps "$INSTALL" "$CQ_REPO/ledger/install-steps.tsv"
   [ "$status" -eq 0 ]
-  [ "$(grep -c . <<<"$output")" -eq 50 ]
-  [ "$(grep -c '^skip' <<<"$output")" -eq 10 ]
+  [ "$(grep -c . <<<"$output")" -eq "$(grep -vc '^#' "$CQ_REPO/ledger/install-steps.tsv")" ]
+  [ "$(grep -c '^skip' <<<"$output")" -eq "$(awk -F'\t' '!/^#/ && $2 == "skip"' "$CQ_REPO/ledger/install-steps.tsv" | wc -l)" ]
 }
 
 @test "install runs every phase in order and marks each one" {

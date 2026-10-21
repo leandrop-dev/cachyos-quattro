@@ -1,0 +1,25 @@
+#!/bin/bash
+# Print the omarchy version in a repository database when it is newer than the last reviewed
+# release in ledger/releases.tsv; exit 1, printing nothing, when it is not.
+#
+#   tools/upstream-check <omarchy.db> <releases.tsv>
+
+set -euo pipefail
+
+(($# == 2)) || {
+  echo "usage: tools/upstream-check <omarchy.db> <releases.tsv>" >&2
+  exit 2
+}
+reviewed=$(awk -F'\t' '!/^#/ && $3 == "reviewed" { v = $1 } END { print v }' "$2")
+[[ -n $reviewed ]] || {
+  echo "upstream-check: no reviewed release in $2" >&2
+  exit 2
+}
+# Entries are [./]<name>-<pkgver>-<pkgrel>/; omarchy-settings-… has more dashes and does not match.
+latest=$(bsdtar -tf "$1" | sed -n 's|^\(\./\)\{0,1\}omarchy-\([^-/]*\)-[^-/]*/$|\2|p' | sort -V | tail -n1)
+[[ -n $latest ]] || {
+  echo "upstream-check: no omarchy package in $1" >&2
+  exit 2
+}
+(($(vercmp "$latest" "$reviewed") > 0)) || exit 1
+echo "$latest"

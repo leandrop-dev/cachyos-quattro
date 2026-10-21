@@ -65,9 +65,9 @@ fake_real() {
   [ "$output" = "real omarchy-snapshot restore" ]
 }
 
-@test "every stubbed command exists in Omarchy 4.0.6" {
+@test "every stubbed command exists in the reviewed Omarchy release" {
   stubbed >/dev/null
   while read -r name; do
-    cut -f1 "$LEDGER/commands.4.0.6.tsv" | grep -qxF "$name" || { echo "$name is not an Omarchy 4.0.6 command"; false; }
+    cut -f1 "$LEDGER/commands.$(reviewed_release).tsv" | grep -qxF "$name" || { echo "$name is not an Omarchy $(reviewed_release) command"; false; }
   done <<<"$(stubbed)"
 }

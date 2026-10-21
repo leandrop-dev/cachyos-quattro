@@ -1,0 +1,36 @@
+#!/bin/bash
+# Open a GitHub issue labelled upstream-release with a report as its body, once per title.
+#
+#   tools/upstream-issue <title> <report.md> [<url of the full report>]
+#
+# Skips when an issue with exactly this title exists, open or closed, so the daily run does
+# not repeat itself. A report longer than GitHub's 65536-character body limit is cut at a line
+# boundary, with a pointer to the full report. Uses gh and its GH_TOKEN.
+
+set -euo pipefail
+
+(($# >= 2)) || {
+  echo "usage: tools/upstream-issue <title> <report.md> [<url of the full report>]" >&2
+  exit 2
+}
+title=$1 report=$2 full=${3:-}
+label=upstream-release
+limit=60000
+
+existing=$(gh issue list --label "$label" --state all --limit 200 --json title --jq '.[].title')
+if grep -qxF -e "$title" <<<"$existing"; then
+  echo "upstream-issue: an issue titled '$title' exists; not opening another"
+  exit 0
+fi
+
+body=$(mktemp)
+trap 'rm -f "$body"' EXIT
+if (($(wc -c <"$report") > limit)); then
+  head -c "$limit" "$report" | sed '$d' >"$body"
+  printf '\n\n---\n**Report truncated** at %d characters.%s\n' "$limit" "${full:+ Full report: $full}" >>"$body"
+else
+  cp "$report" "$body"
+fi
+
+gh label create "$label" --color D93F0B --description "A new Omarchy release to review" --force
+gh issue create --title "$title" --label "$label" --body-file "$body"
