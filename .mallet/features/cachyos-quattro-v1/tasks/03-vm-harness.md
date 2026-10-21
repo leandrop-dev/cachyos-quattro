@@ -1,5 +1,5 @@
 # Task: vm-harness
-Status: pending
+Status: done
 Deps: 01
 
 ## Goal
@@ -30,4 +30,13 @@ Add a QEMU/OVMF harness that runs each test on a disposable overlay of a golden 
 - [ ] Confirm no regressions
 
 ## Notes
+As built (2026-10-21), differing from the steps above:
+- Host tools were already installed; `rsync` is not, so the tree is copied with `tar` over `ssh`.
+- `install-golden.sh` became `tests/vm/golden.sh {install|boot|seal}`; `seal` makes the image read-only, which `run.sh` requires before it creates an overlay.
+- The QMP socket lives in `mktemp -d $XDG_RUNTIME_DIR/cq-vm.XXXXXX`, because QEMU rejects UNIX socket paths of 108 bytes or more and the repo-relative path came close.
+- The passphrase is typed after 25 s and retried up to four times until SSH answers, since a Plymouth prompt is not visible on the serial console. `vm_stop` tolerates socat's "Connection reset by peer" when QEMU exits on `quit`.
+- `tests/vm/fetch.sh` copies files out of a sealed image (used for the fixtures); guest-side scripts live in `tests/vm/guest/`. `run.sh` compares `/proc/sys/kernel/random/boot_id` before and after the reboot, so a reboot that never happened fails the run.
+- Golden setup also needs `sudo ufw allow 22/tcp` (CachyOS ships ufw active) and `ssh-copy-id -o UserKnownHostsFile=/dev/null` (each image has its own host key on 127.0.0.1:2222).
+- Shared functions live in `tests/vm/lib.sh`; `tests/unit/vm-harness.bats` covers key mapping and argument checks (written alongside the code, not before it).
+
 Golden image creation needs the user at the VM console (Calamares is interactive). Images are never modified after creation; every run uses an overlay. If QMP passphrase timing proves flaky, fall back to watching the serial console with `console=ttyS0` added to the golden image's cmdline.

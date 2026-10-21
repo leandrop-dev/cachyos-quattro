@@ -1,8 +1,3 @@
-# SYNTHETIC: stands in for the CachyOS installer's file until task 03 copies
-# the real one from the golden image. Values are placeholders.
-TARGET_OS_NAME="CachyOS"
 ESP_PATH="/boot"
-KERNEL_CMDLINE[default]+="quiet nowatchdog splash rd.luks.uuid=00000000-0000-0000-0000-000000000000 root=/dev/mapper/luks-00000000-0000-0000-0000-000000000000 rootflags=subvol=/@ rw"
-ENABLE_UKI=no
+KERNEL_CMDLINE[default]+="quiet nowatchdog splash rw rootflags=subvol=/@ rd.luks.uuid=00000000-0000-0000-0000-000000000000 root=/dev/mapper/luks-00000000-0000-0000-0000-000000000000"
 BOOT_ORDER="*, *lts, *fallback, Snapshots"
-MAX_SNAPSHOT_ENTRIES=auto
