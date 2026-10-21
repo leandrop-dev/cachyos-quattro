@@ -9,5 +9,4 @@ omarchy-hibernation-setup
 omarchy-hibernation-remove
 omarchy-system-factory-reset
 omarchy-reinstall-configs
-omarchy-refresh-plymouth
 omarchy-snapshot
