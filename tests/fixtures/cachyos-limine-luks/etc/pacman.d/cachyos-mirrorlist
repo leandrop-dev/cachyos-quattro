@@ -1,70 +1,148 @@
-######################################################
-####                                              ####
-####        CachyOS Repository Mirrorlist         ####
-####                                              ####
-######################################################
-## CDN77 (World Wide Datacenters)
+# STARTED AT: 2026-10-21 00:37:36.718055306 +01:00
+# VERSION: 0.33.0
+# ARGS: rate-mirrors --save /tmp/tmp.LXaOj5He1R cachyos
+# FETCHED MIRRORS: 34
+# MIRRORS LEFT AFTER FILTERING: 34
+# JUMP #1
+# EXPLORING PT
+# VISITED PT
+#     + NEIGHBOR UK (by HubsFirst)
+#     + NEIGHBOR CN (by HubsFirst)
+#     + NEIGHBOR IT (by HubsFirst)
+#     + NEIGHBOR CH (by DistanceFirst)
+#     + NEIGHBOR RU (by DistanceFirst)
+#     + NEIGHBOR NL (by DistanceFirst)
+# [IT] SpeedTestResult { speed: 12.5 MB/s; elapsed: 490ms; connection_time: 233ms }
+# [UK] SpeedTestResult { speed: 12.9 MB/s; elapsed: 474ms; connection_time: 351ms }
+# [NL] SpeedTestResult { speed: 9.4 MB/s; elapsed: 654ms; connection_time: 249ms }
+# [IT] SpeedTestResult { speed: 8.6 MB/s; elapsed: 714ms; connection_time: 274ms }
+# [CH] SpeedTestResult { speed: 4.2 MB/s; elapsed: 999ms; connection_time: 238ms }
+# [CH] SpeedTestResult { speed: 4.0 MB/s; elapsed: 1.00s; connection_time: 385ms }
+# [RU] SpeedTestResult { speed: 7.3 MB/s; elapsed: 842ms; connection_time: 546ms }
+# [RU] SpeedTestResult { speed: 774.6 KB/s; elapsed: 993ms; connection_time: 511ms }
+# [CN] SpeedTestResult { speed: 181.0 KB/s; elapsed: 905ms; connection_time: 1.20s }
+# [CN] SpeedTestResult { speed: 123.5 KB/s; elapsed: 994ms; connection_time: 2.67s }
+#     TOP NEIGHBOR - CONNECTION TIME: IT - 233ms
+#     TOP NEIGHBOR - SPEED: UK - 12.9 MB/s
+# 
+# JUMP #2
+# EXPLORING IT
+#     + NEIGHBOR NO (by HubsFirst)
+#     + NEIGHBOR FR (by HubsFirst)
+#     + NEIGHBOR SE (by HubsFirst)
+#     + NEIGHBOR AT (by DistanceFirst)
+#     + NEIGHBOR HU (by DistanceFirst)
+#     + NEIGHBOR DE (by DistanceFirst)
+# EXPLORING UK
+#     + NEIGHBOR US (by HubsFirst)
+#     + NEIGHBOR CA (by HubsFirst)
+#     + NEIGHBOR KR (by HubsFirst)
+#     + NEIGHBOR FI (by DistanceFirst)
+#     + NEIGHBOR BD (by DistanceFirst)
+# [DE] FAILED TO CONNECT TO https://mirror.mergedcloud.de/cachyos/repo/x86_64/cachyos/cachyos.files
+# [AT] SpeedTestResult { speed: 12.4 MB/s; elapsed: 497ms; connection_time: 142ms }
+# [HU] SpeedTestResult { speed: 15.5 MB/s; elapsed: 396ms; connection_time: 476ms }
+# [NO] SpeedTestResult { speed: 9.3 MB/s; elapsed: 659ms; connection_time: 292ms }
+# [SE] SpeedTestResult { speed: 8.4 MB/s; elapsed: 729ms; connection_time: 321ms }
+# [US] SpeedTestResult { speed: 6.6 MB/s; elapsed: 928ms; connection_time: 163ms }
+# [FI] SpeedTestResult { speed: 3.6 MB/s; elapsed: 981ms; connection_time: 406ms }
+# [US] SpeedTestResult { speed: 679.7 KB/s; elapsed: 879ms; connection_time: 473ms }
+# [CA] SpeedTestResult { speed: 740.8 KB/s; elapsed: 994ms; connection_time: 536ms }
+# [KR] SpeedTestResult { speed: 256.4 KB/s; elapsed: 840ms; connection_time: 613ms }
+# [KR] SpeedTestResult { speed: 244.1 KB/s; elapsed: 881ms; connection_time: 652ms }
+# [BD] SpeedTestResult { speed: 379.3 KB/s; elapsed: 992ms; connection_time: 713ms }
+# [FR] SpeedTestResult { speed: 947.4 KB/s; elapsed: 925ms; connection_time: 772ms }
+#     TOP NEIGHBOR - CONNECTION TIME: AT - 142ms
+#     TOP NEIGHBOR - SPEED: HU - 15.5 MB/s
+# 
+# JUMP #3
+# EXPLORING AT
+# EXPLORING HU
+# BLANK ITERATION
+# COUNTRY JUMPING YIELDED TOO FEW MIRRORS (22), ADDING OTHERS TO UNLABELED
+# 
+
+# TESTING UNLABELED MIRRORS
+# SpeedTestResult { speed: 43.3 MB/s; elapsed: 141ms; connection_time: 60ms }
+# SpeedTestResult { speed: 32.3 MB/s; elapsed: 189ms; connection_time: 60ms }
+# SpeedTestResult { speed: 25.6 MB/s; elapsed: 239ms; connection_time: 179ms }
+# TOO FEW BYTES LOADED https://mirror.hjk.gg/cachyos/repo/
+# [RU] SpeedTestResult { speed: 10.1 MB/s; elapsed: 609ms; connection_time: 390ms }
+# [US] SpeedTestResult { speed: 2.0 MB/s; elapsed: 910ms; connection_time: 204ms }
+# TOO FEW BYTES LOADED https://cachyos.mirror.sahil.world/repo/
+# [US] SpeedTestResult { speed: 6.3 MB/s; elapsed: 975ms; connection_time: 327ms }
+# [RU] SpeedTestResult { speed: 3.9 MB/s; elapsed: 985ms; connection_time: 358ms }
+# [US] SpeedTestResult { speed: 6.8 MB/s; elapsed: 903ms; connection_time: 568ms }
+# SpeedTestResult { speed: 465.8 KB/s; elapsed: 902ms; connection_time: 525ms }
+# 
+
+# RE-TESTING TOP MIRRORS
+# SpeedTestResult { speed: 58.4 MB/s; elapsed: 105ms; connection_time: 46ms }
+# SpeedTestResult { speed: 58.7 MB/s; elapsed: 104ms; connection_time: 28ms }
+# SpeedTestResult { speed: 25.7 MB/s; elapsed: 239ms; connection_time: 84ms }
+# [HU] SpeedTestResult { speed: 15.1 MB/s; elapsed: 408ms; connection_time: 369ms }
+# [UK] SpeedTestResult { speed: 6.0 MB/s; elapsed: 391ms; connection_time: 175ms }
+# ==== RESULTS (top re-tested) ====
+#   1. SpeedTestResult { speed: 58.7 MB/s; elapsed: 104ms; connection_time: 28ms } -> https://mirror5.krfoss.org/cachyos/repo/
+#   2. SpeedTestResult { speed: 58.4 MB/s; elapsed: 105ms; connection_time: 46ms } -> https://mirror.krfoss.org/cachyos/repo/
+#   3. SpeedTestResult { speed: 25.7 MB/s; elapsed: 239ms; connection_time: 84ms } -> https://cdn77.cachyos.org/repo/
+#   4. [HU] SpeedTestResult { speed: 15.1 MB/s; elapsed: 408ms; connection_time: 369ms } -> https://mirror.bali0531.hu/repo/
+#   5. [UK] SpeedTestResult { speed: 6.0 MB/s; elapsed: 391ms; connection_time: 175ms } -> https://repo.c48.uk/cachyos/repo/
+#   6. [IT] SpeedTestResult { speed: 12.5 MB/s; elapsed: 490ms; connection_time: 233ms } -> https://cachyos-mirror.m1k.cloud/repo/
+#   7. [AT] SpeedTestResult { speed: 12.4 MB/s; elapsed: 497ms; connection_time: 142ms } -> https://at.cachyos.org/repo/
+#   8. [RU] SpeedTestResult { speed: 10.1 MB/s; elapsed: 609ms; connection_time: 390ms } -> https://mirror.cachy-arch.ru/cachyos/repo/
+#   9. [NL] SpeedTestResult { speed: 9.4 MB/s; elapsed: 654ms; connection_time: 249ms } -> https://nl.mirror.cx/cachyos/repo/
+#  10. [NO] SpeedTestResult { speed: 9.3 MB/s; elapsed: 659ms; connection_time: 292ms } -> https://no.mirror.cx/cachyos/repo/
+#  11. [IT] SpeedTestResult { speed: 8.6 MB/s; elapsed: 714ms; connection_time: 274ms } -> https://cachyos.next-works.it/repo/
+#  12. [SE] SpeedTestResult { speed: 8.4 MB/s; elapsed: 729ms; connection_time: 321ms } -> https://mirror.zyner.org/cachyos/repo/
+#  13. [RU] SpeedTestResult { speed: 7.3 MB/s; elapsed: 842ms; connection_time: 546ms } -> https://archlinux.gay/cachy/repo/
+#  14. [US] SpeedTestResult { speed: 6.8 MB/s; elapsed: 903ms; connection_time: 568ms } -> https://mirror.lug.umbc.edu/cachyos/repo/
+#  15. [US] SpeedTestResult { speed: 6.6 MB/s; elapsed: 928ms; connection_time: 163ms } -> https://us-mnz.soulharsh007.dev/cachyos/repo/
+#  16. [US] SpeedTestResult { speed: 6.3 MB/s; elapsed: 975ms; connection_time: 327ms } -> https://mirror.rosely.me/cachyos/repo/
+#  17. [CH] SpeedTestResult { speed: 4.2 MB/s; elapsed: 999ms; connection_time: 238ms } -> https://mirror.init7.net/cachyos/repo/
+#  18. [CH] SpeedTestResult { speed: 4.0 MB/s; elapsed: 1.00s; connection_time: 385ms } -> https://mirror.hb9hil.org/cachyos/repo/
+#  19. [RU] SpeedTestResult { speed: 3.9 MB/s; elapsed: 985ms; connection_time: 358ms } -> https://mirror.jura12.ru/repo/
+#  20. [FI] SpeedTestResult { speed: 3.6 MB/s; elapsed: 981ms; connection_time: 406ms } -> https://cachyos.doridian.net/repo/
+#  21. [US] SpeedTestResult { speed: 2.0 MB/s; elapsed: 910ms; connection_time: 204ms } -> https://us.cachyos.org/repo/
+#  22. [FR] SpeedTestResult { speed: 947.4 KB/s; elapsed: 925ms; connection_time: 772ms } -> https://mirror.lesviallon.fr/cachy/repo/
+#  23. [RU] SpeedTestResult { speed: 774.6 KB/s; elapsed: 993ms; connection_time: 511ms } -> https://wan.metrosg.ru/cachyos/repo/
+#  24. [CA] SpeedTestResult { speed: 740.8 KB/s; elapsed: 994ms; connection_time: 536ms } -> https://ca.mirror.cx/cachyos/repo/
+#  25. [US] SpeedTestResult { speed: 679.7 KB/s; elapsed: 879ms; connection_time: 473ms } -> https://mirrors.lansing2600.org/cachyos/repo/
+#  26. SpeedTestResult { speed: 465.8 KB/s; elapsed: 902ms; connection_time: 525ms } -> https://cdn.lansing2600.org/cachyos/repo/
+#  27. [BD] SpeedTestResult { speed: 379.3 KB/s; elapsed: 992ms; connection_time: 713ms } -> https://mirror.limda.net/cachy/repo/
+#  28. [KR] SpeedTestResult { speed: 256.4 KB/s; elapsed: 840ms; connection_time: 613ms } -> https://mirror.keiminem.com/cachyos/repo/
+#  29. [KR] SpeedTestResult { speed: 244.1 KB/s; elapsed: 881ms; connection_time: 652ms } -> https://mirror2.keiminem.com/cachyos/repo/
+#  30. [CN] SpeedTestResult { speed: 181.0 KB/s; elapsed: 905ms; connection_time: 1.20s } -> https://mirror.nju.edu.cn/cachyos/repo/
+#  31. [CN] SpeedTestResult { speed: 123.5 KB/s; elapsed: 994ms; connection_time: 2.67s } -> https://mirrors.ustc.edu.cn/cachyos/repo/
+# FINISHED AT: 2026-10-21 00:37:46.169539644 +01:00
+Server = https://mirror5.krfoss.org/cachyos/repo/$arch/$repo
+Server = https://mirror.krfoss.org/cachyos/repo/$arch/$repo
 Server = https://cdn77.cachyos.org/repo/$arch/$repo
-## Rerouted to mirror
-# Server = https://cdn.cachyos.org/repo/$arch/$repo
-## Germany, disabled due Netcup issues:
-## : OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 0"
-# Server = https://mirror.cachyos.org/repo/$arch/$repo
-## USA Mirror much thanks to corpdecker!
-Server = https://us.cachyos.org/repo/$arch/$repo
-## India Mirror much thanks to https://github.com/albonycal
-## Disabled due issues at installation
-## Server = https://mirror.albony.xyz/cachylinux/repo/$arch/$repo
-## France Mirror much thanks to Antoine Viallon (aviallon)
-Server = https://mirror.lesviallon.fr/cachy/repo/$arch/$repo
-## Russia Mirror # Removed till sync issue is resolved
-# Server = https://mirror.truenetwork.ru/cachy/repo/$arch/$repo
-## Norway Mirror much thanks to QuadFeed
-# Server = https://mirror.fast0ne.com/repo/$arch/$repo
-## Norway,Netherlands,Canada Mirror much thanks to innoix
-Server = https://no.mirror.cx/cachyos/repo/$arch/$repo
-Server = https://nl.mirror.cx/cachyos/repo/$arch/$repo
-Server = https://ca.mirror.cx/cachyos/repo/$arch/$repo
-## Sweden Mirror much thanks to Zyner!
-Server = https://mirror.zyner.org/mirror/cachyos/repo/$arch/$repo
-## South Korea much thanks to Mihate Hiura!
-# Server = https://mirror.funami.tech/cachy/repo/$arch/$repo
-## Austria Mirror much thanks to Soulharsh!
+Server = https://mirror.bali0531.hu/repo/$arch/$repo
+Server = https://repo.c48.uk/cachyos/repo/$arch/$repo
+Server = https://cachyos-mirror.m1k.cloud/repo/$arch/$repo
 Server = https://at.cachyos.org/repo/$arch/$repo
-## Germany Mirror much thanks to Soulharsh!
-## Server = https://de-nue.soulharsh007.dev/cachyos/repo/$arch/$repo
-## Germany Mirror much thanks to MergedEyes!
-Server = https://mirror.mergedcloud.de/cachyos/repo/$arch/$repo
-## USA Mirror much thanks to Soulharsh!
+Server = https://mirror.cachy-arch.ru/cachyos/repo/$arch/$repo
+Server = https://nl.mirror.cx/cachyos/repo/$arch/$repo
+Server = https://no.mirror.cx/cachyos/repo/$arch/$repo
+Server = https://cachyos.next-works.it/repo/$arch/$repo
+Server = https://mirror.zyner.org/cachyos/repo/$arch/$repo
+Server = https://archlinux.gay/cachy/repo/$arch/$repo
+Server = https://mirror.lug.umbc.edu/cachyos/repo/$arch/$repo
 Server = https://us-mnz.soulharsh007.dev/cachyos/repo/$arch/$repo
-## USA Mirror & CDN mirror provided by Lansing 2600 in Lansing, MI, USA
+Server = https://mirror.rosely.me/cachyos/repo/$arch/$repo
+Server = https://mirror.init7.net/cachyos/repo/$arch/$repo
+Server = https://mirror.hb9hil.org/cachyos/repo/$arch/$repo
+Server = https://mirror.jura12.ru/repo/$arch/$repo
+Server = https://cachyos.doridian.net/repo/$arch/$repo
+Server = https://us.cachyos.org/repo/$arch/$repo
+Server = https://mirror.lesviallon.fr/cachy/repo/$arch/$repo
+Server = https://wan.metrosg.ru/cachyos/repo/$arch/$repo
+Server = https://ca.mirror.cx/cachyos/repo/$arch/$repo
 Server = https://mirrors.lansing2600.org/cachyos/repo/$arch/$repo
 Server = https://cdn.lansing2600.org/cachyos/repo/$arch/$repo
-## China Mirror 10GBs much thanks to eScience Center, Nanjing University!
-Server = https://mirror.nju.edu.cn/cachyos/repo/$arch/$repo
-## China Mirror much thanks to University of Science and Technology of China!
-Server = https://mirrors.ustc.edu.cn/cachyos/repo/$arch/$repo
-## Hong Kong Mirror much thanks to Saren!
-# Server = https://cachy-mirror.wtako.net/repo/$arch/$repo
-## Quebec, Canada Mirror from All Things Linux
-Server = https://mirror.allthingslinux.org/cachyos/repo/$arch/$repo
-## Italy Mirror much thanks to NextWorks!
-Server = https://cachyos.next-works.it/repo/$arch/$repo
-## Italy Mirror much thanks to ironashram!
-Server = https://cachyos-mirror.m1k.cloud/repo/$arch/$repo
-## Bangladesh 10 GBs much thanks to Limda!
 Server = https://mirror.limda.net/cachy/repo/$arch/$repo
-## Finland Mirror much thanks to doridian!
-Server = https://cachyos.doridian.net/repo/$arch/$repo
-## Switzerland Mirror much thanks to Fabian!
-Server = https://mirror.hb9hil.org/cachyos/repo/$arch/$repo
-## Russia Mirror from Yandex
-# Server = https://mirror.yandex.ru/cachyos/repo/$arch/$repo
-## Russia Mirror much thanks to quinowell and haku.host
-Server = https://archlinux.gay/cachy/repo/$arch/$repo
-## Russia Mirror much thanks to jura12
-Server = https://mirror.jura12.ru/repo/$arch/$repo
-## Russia Mirror much thanks to cachy-arch.ru
-Server = https://mirror.cachy-arch.ru/cachyos/repo/$arch/$repo
-## Russia Mirror much thanks to wan666 from metrosg.ru
-Server = https://wan.metrosg.ru/cachyos/repo/$arch/$repo
+Server = https://mirror.keiminem.com/cachyos/repo/$arch/$repo
+Server = https://mirror2.keiminem.com/cachyos/repo/$arch/$repo
+Server = https://mirror.nju.edu.cn/cachyos/repo/$arch/$repo
+Server = https://mirrors.ustc.edu.cn/cachyos/repo/$arch/$repo

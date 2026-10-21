@@ -1,1 +1,1 @@
-BOOT_IMAGE=/0123456789abcdef0123456789abcdef/linux-cachyos/vmlinuz-linux-cachyos quiet nowatchdog splash root=UUID=00000000-0000-0000-0000-000000000000 rootflags=subvol=/@ rw
+quiet nowatchdog splash rw rootflags=subvol=/@ root=UUID=00000000-0000-0000-0000-000000000000
