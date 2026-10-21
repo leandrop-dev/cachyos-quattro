@@ -1,0 +1,81 @@
+#!/bin/bash
+# Installed as /usr/local/bin/<name> for the Omarchy commands in stubbed-commands.txt,
+# which rewrite what CachyOS owns: the boot loader, the initramfs, pacman configuration
+# and the root filesystem layout. /usr/local/bin comes before /usr/bin in PATH and in
+# sudo's secure_path, so a user who types the command gets this explanation instead.
+#
+# This is a convenience, not a protection: Omarchy runs some commands by absolute path,
+# including everything the `omarchy` menu and router dispatch, and those are not caught.
+# CQ_ALLOW_DANGEROUS=1 runs the real command.
+
+set -euo pipefail
+
+name=$(basename "$0")
+real=${CQ_ROOT:-}/usr/bin/$name
+label=$name
+
+# Only `omarchy-snapshot restore` is blocked; `create` and the rest pass through.
+if [[ $name == omarchy-snapshot ]]; then
+  [[ ${1:-} == restore ]] || exec "$real" "$@"
+  label="$name restore"
+fi
+
+[[ ${CQ_ALLOW_DANGEROUS:-} == 1 ]] && exec "$real" "$@"
+
+case $name in
+omarchy-refresh-limine)
+  why="it overwrites /boot/limine.conf with Omarchy's boot entries, which CachyOS's Limine setup does not use."
+  instead="Change boot settings in /etc/default/limine, then run: sudo limine-update"
+  ;;
+omarchy-refresh-pacman)
+  why="it replaces /etc/pacman.conf and /etc/pacman.d/mirrorlist with Omarchy's repositories and mirrors."
+  instead="Rank CachyOS mirrors with: sudo cachyos-rate-mirrors"
+  ;;
+omarchy-channel-set)
+  why="it switches channels by rewriting pacman configuration through omarchy-refresh-pacman."
+  instead="cachyos-quattro follows Omarchy's stable repository; other channels are not supported."
+  ;;
+omarchy-upgrade-to-quattro)
+  why="it converts an Omarchy 3 install and rewrites boot, pacman and system identity."
+  instead="This system runs Omarchy on CachyOS; update it with: cachyos-quattro update"
+  ;;
+omarchy-setup-direct-boot)
+  why="it adds an EFI boot entry for Omarchy's unified kernel image, which CachyOS does not build."
+  instead="Keep booting through Limine."
+  ;;
+omarchy-hibernation-setup)
+  why="it creates a swap subvolume and edits /etc/fstab, the Limine entry settings and the initramfs."
+  instead="Set up hibernation by hand; see the Arch Wiki page 'Power management/Suspend and hibernate'."
+  ;;
+omarchy-hibernation-remove)
+  why="it deletes the swap subvolume and edits /etc/fstab and the initramfs."
+  instead="Undo a hibernation setup by hand, in the reverse order it was made."
+  ;;
+omarchy-system-factory-reset)
+  why="it replaces the btrfs root and rewrites boot configuration with Omarchy's layout."
+  instead="To roll the system back, boot a snapshot from the Snapshots entry in the Limine menu."
+  ;;
+omarchy-reinstall-configs)
+  why="it copies /etc/skel over your home directory, then runs omarchy-refresh-limine and omarchy-refresh-plymouth."
+  instead="Reset a single config with: omarchy-refresh-config <config-path>"
+  ;;
+omarchy-refresh-plymouth)
+  why="it rebuilds the initramfs, which CachyOS owns."
+  instead="omarchy-settings already sets the omarchy Plymouth theme; it takes effect at the next initramfs rebuild."
+  ;;
+omarchy-snapshot)
+  why="it runs limine-snapper-restore without checking which snapshot the system booted."
+  instead="Boot the snapshot you want from the Snapshots entry in the Limine menu, then run: sudo limine-snapper-restore"
+  ;;
+*)
+  why="cachyos-quattro has no explanation recorded for it."
+  instead="Report this at https://github.com/leandrop-dev/cachyos-quattro/issues"
+  ;;
+esac
+
+cat >&2 <<EOF
+$label is blocked on CachyOS: $why
+$instead
+To run it anyway: CQ_ALLOW_DANGEROUS=1 $label
+EOF
+exit 1

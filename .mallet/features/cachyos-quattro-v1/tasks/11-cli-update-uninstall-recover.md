@@ -39,3 +39,4 @@ Add `update`, `uninstall` and `recover` commands and the recovery guide.
 
 ## Notes
 Uninstall removes the desktop but cannot restore user files changed after install beyond `home.tar`; the summary says so.
+- Keep the pacman.conf block removal before `pacman -Rns cachyos-quattro`: pacman refuses to start while an `Include` names a missing file (verified in task 05, including for glob patterns), so the reverse order leaves pacman stopped. The package's `pre_remove` warns about this when someone runs `pacman -R` directly.

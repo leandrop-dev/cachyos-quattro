@@ -11,6 +11,7 @@
 #   install.<v>.txt     each package's .INSTALL scriptlet, verbatim
 #   packages.<v>.tsv    package  field  value   (depend, conflict, provides, replaces)
 #   migrations.<v>.tsv  name  sha256  privileged(yes|no)  first echo line
+#   commands.<v>.tsv    omarchy-* command  requires-sudo(yes|no)
 
 set -euo pipefail
 
@@ -109,4 +110,11 @@ grep -l '^# omarchy:requires-sudo=true' "$bindir"/omarchy-* | xargs -n1 basename
   done
 } >"$outdir/migrations.$version.tsv"
 
-echo "ledger-gen: wrote files, install, packages and migrations for $version to $outdir" >&2
+for c in "$bindir"/omarchy-*; do
+  name=$(basename "$c")
+  sudo=no
+  grep -qxF -e "$name" "$work/sudo-commands.txt" && sudo=yes
+  printf '%s\t%s\n' "$name" "$sudo"
+done >"$outdir/commands.$version.tsv"
+
+echo "ledger-gen: wrote files, install, packages, migrations and commands for $version to $outdir" >&2
