@@ -24,10 +24,10 @@ CLI="$BATS_TEST_DIRNAME/../../bin/cachyos-quattro"
   [[ $output == *"Usage: cachyos-quattro"* ]]
 }
 
-@test "a command whose task has not landed says so" {
+@test "recover without --backup says what it needs" {
   run "$CLI" recover
   [ "$status" -eq 1 ]
-  [[ $output == *"'recover' is not available yet"* ]]
+  [[ $output == *"--backup <dir> is required"* ]]
 }
 
 @test "status dispatches to cmd_status" {
