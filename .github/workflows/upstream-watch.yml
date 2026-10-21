@@ -1,0 +1,110 @@
+name: Upstream watch
+
+# Daily: open a "Review Omarchy <version>" issue when Omarchy's stable repository ships a release
+# newer than the last reviewed one in ledger/releases.tsv, and an "Early warning: Omarchy <tag>"
+# issue for a newer pre-release on GitHub. docs/reviewing-a-release.md says what to do next.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  stable:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed git github-cli curl gnupg libarchive diffutils
+      - uses: actions/checkout@v4
+      - name: Look for a release newer than the reviewed one
+        id: check
+        run: |
+          curl -fsSL -o omarchy.db https://pkgs.omarchy.org/stable/x86_64/omarchy.db
+          set +e
+          new=$(tools/upstream-check omarchy.db ledger/releases.tsv)
+          rc=$?
+          set -e
+          case $rc in
+          0) echo "version=$new" >>"$GITHUB_OUTPUT"; echo "New stable release: $new" ;;
+          1) echo "No stable release newer than the reviewed one." ;;
+          *) exit "$rc" ;;
+          esac
+      - name: Build the review report
+        if: steps.check.outputs.version != ''
+        env:
+          NEW: ${{ steps.check.outputs.version }}
+        run: |
+          reviewed=$(awk -F'\t' '!/^#/ && $3 == "reviewed" { v = $1 } END { print v }' ledger/releases.tsv)
+          export CQ_LEDGER_WORK=$PWD/build/watch
+          tools/ledger-gen "$reviewed" build/watch/gen-reviewed
+          tools/ledger-gen "$NEW" build/watch/gen-new
+          tools/upstream-diff ledger "build/watch/$reviewed" "build/watch/$NEW" >report.md
+      - name: Keep the full report
+        if: steps.check.outputs.version != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-report
+          path: report.md
+      - name: Open the review issue
+        if: steps.check.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NEW: ${{ steps.check.outputs.version }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: tools/upstream-issue "Review Omarchy $NEW" report.md "$RUN_URL"
+
+  early:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed git github-cli
+      - uses: actions/checkout@v4
+      - name: Look for a pre-release newer than the reviewed release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          reviewed=$(awk -F'\t' '!/^#/ && $3 == "reviewed" { v = $1 } END { print v }' ledger/releases.tsv)
+          tag=""
+          for t in $(gh release list -R omacom/omarchy --limit 10 --json tagName,isPrerelease --jq '.[] | select(.isPrerelease) | .tagName'); do
+            if (($(vercmp "${t#v}" "$reviewed") > 0)) && { [[ -z $tag ]] || (($(vercmp "${t#v}" "${tag#v}") > 0)); }; then
+              tag=$t
+            fi
+          done
+          echo "reviewed=$reviewed" >>"$GITHUB_OUTPUT"
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+          echo "Newest pre-release after $reviewed: ${tag:-none}"
+      - name: Build the early warning
+        if: steps.check.outputs.tag != ''
+        env:
+          REVIEWED: ${{ steps.check.outputs.reviewed }}
+          TAG: ${{ steps.check.outputs.tag }}
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/omacom/omarchy.git build/omarchy
+          tools/upstream-early build/omarchy "v$REVIEWED" "$TAG" >early.md
+      - name: Keep the full early warning
+        if: steps.check.outputs.tag != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: early-warning
+          path: early.md
+      - name: Open the early-warning issue
+        if: steps.check.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.check.outputs.tag }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          tools/upstream-issue "Early warning: Omarchy $TAG" early.md "$RUN_URL"

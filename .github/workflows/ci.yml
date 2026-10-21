@@ -14,7 +14,7 @@ jobs:
     container: archlinux:latest
     steps:
       - name: Install tools
-        run: pacman -Syu --noconfirm --needed bats shellcheck make git diffutils
+        run: pacman -Syu --noconfirm --needed bats shellcheck actionlint make git diffutils
       - uses: actions/checkout@v4
       # The CLI refuses to run as root, as on a real system, so the tests run as a normal user.
       - name: Lint and test

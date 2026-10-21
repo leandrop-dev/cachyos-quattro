@@ -1,0 +1,97 @@
+#!/bin/bash
+# Write the machine-readable ledger for one extracted Omarchy release. Reads only files;
+# never executes anything from the packages.
+#
+#   tools/ledger-scan <tree> <outdir>
+#
+# <tree> holds the extracted packages as <tree>/omarchy/ and <tree>/omarchy-settings/
+# (tools/ledger-gen downloads, verifies and extracts them). Writes to <outdir>, where <v> is
+# the omarchy package's version without its pkgrel:
+#   files.<v>.tsv       path  package  backup(yes|no)  sha256 or symlink:<target>
+#   install.<v>.txt     each package's .INSTALL scriptlet, verbatim
+#   packages.<v>.tsv    package  field  value   (depend, conflict, provides, replaces)
+#   migrations.<v>.tsv  name  sha256  privileged(yes|no)  first echo line
+#   commands.<v>.tsv    omarchy-* command  requires-sudo(yes|no)
+
+set -euo pipefail
+
+(($# == 2)) || {
+  echo "usage: tools/ledger-scan <tree> <outdir>" >&2
+  exit 2
+}
+tree=$(cd "$1" && pwd)
+outdir=$(mkdir -p "$2" && cd "$2" && pwd)
+packages=(omarchy omarchy-settings)
+# Paths a CachyOS system cares about; everything else is desktop payload.
+watched='^(etc|usr/lib|usr/local|usr/share/libalpm/hooks|boot)/'
+version=$(sed -n 's/^pkgver = //p' "$tree/omarchy/.PKGINFO")
+version=${version%-*}
+[[ -n $version ]] || {
+  echo "ledger-scan: no pkgver in $tree/omarchy/.PKGINFO" >&2
+  exit 1
+}
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+{
+  for pkg in "${packages[@]}"; do
+    dir="$tree/$pkg"
+    sed -n 's/^backup = //p' "$dir/.PKGINFO" | sort >"$work/$pkg.backup"
+    (cd "$dir" && find . \( -type f -o -type l \) ! -name '.*' -printf '%P\n') | { grep -E "$watched" || true; } | sort |
+      while IFS= read -r path; do
+        if [[ -L $dir/$path ]]; then
+          sum="symlink:$(readlink "$dir/$path")"
+        else
+          sum=$(sha256sum "$dir/$path" | cut -d' ' -f1)
+        fi
+        backup=no
+        grep -qxF "$path" "$work/$pkg.backup" && backup=yes
+        printf '%s\t%s\t%s\t%s\n' "$path" "$pkg" "$backup" "$sum"
+      done
+  done
+} >"$outdir/files.$version.tsv"
+
+{
+  for pkg in "${packages[@]}"; do
+    echo "### $pkg $version .INSTALL"
+    if [[ -f $tree/$pkg/.INSTALL ]]; then
+      cat "$tree/$pkg/.INSTALL"
+    else
+      echo "(none)"
+    fi
+    echo
+  done
+} >"$outdir/install.$version.txt"
+
+for pkg in "${packages[@]}"; do
+  awk -v pkg="$pkg" -F ' = ' '$1 ~ /^(depend|conflict|provides|replaces)$/ { printf "%s\t%s\t%s\n", pkg, $1, $2 }' \
+    "$tree/$pkg/.PKGINFO"
+done >"$outdir/packages.$version.tsv"
+
+# A migration is privileged when it can change system state: sudo, pkexec, the
+# installer's as_root helper, omarchy-pkg-*, or any omarchy command whose header
+# declares omarchy:requires-sudo=true.
+bindir="$tree/omarchy/usr/bin"
+grep -l '^# omarchy:requires-sudo=true' "$bindir"/omarchy-* | xargs -n1 basename | sort >"$work/sudo-commands.txt"
+{
+  for m in "$tree/omarchy/usr/share/omarchy/migrations"/*.sh; do
+    name=$(basename "$m")
+    sum=$(sha256sum "$m" | cut -d' ' -f1)
+    privileged=no
+    if grep -qE '\bsudo\b|\bpkexec\b|\bas_root\b|omarchy-pkg-' "$m" ||
+      grep -qwF -f "$work/sudo-commands.txt" "$m"; then
+      privileged=yes
+    fi
+    summary=$(grep -m1 -E '^[[:space:]]*echo ' "$m" | sed -E 's/^[[:space:]]*echo[[:space:]]+//; s/^"//; s/"$//; s/\t/ /g' | cut -c1-120)
+    printf '%s\t%s\t%s\t%s\n' "$name" "$sum" "$privileged" "$summary"
+  done
+} >"$outdir/migrations.$version.tsv"
+
+for c in "$bindir"/omarchy-*; do
+  name=$(basename "$c")
+  sudo=no
+  grep -qxF -e "$name" "$work/sudo-commands.txt" && sudo=yes
+  printf '%s\t%s\n' "$name" "$sudo"
+done >"$outdir/commands.$version.tsv"
+
+echo "ledger-scan: wrote files, install, packages, migrations and commands for $version to $outdir" >&2

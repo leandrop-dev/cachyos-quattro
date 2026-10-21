@@ -6,6 +6,7 @@ check: lint test
 
 lint:
 	@if [ -n "$(SHELLCHECK_FILES)" ]; then shellcheck -x -S style $(SHELLCHECK_FILES); fi
+	actionlint .github/workflows/*.yml
 
 test:
 	bats -r tests/unit

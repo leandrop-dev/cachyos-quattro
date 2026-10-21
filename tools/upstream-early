@@ -1,0 +1,56 @@
+#!/bin/bash
+# Markdown early warning for an Omarchy pre-release: the migrations it adds or changes since the
+# reviewed release, read from the source repository (no package is built yet), with the same
+# privileged test the ledger and the migration gate use.
+#
+#   tools/upstream-early <omarchy git checkout> <reviewed tag> <new tag>
+
+# Single-quoted printf formats hold Markdown backticks, not shell expansions.
+# shellcheck disable=SC2016
+
+set -euo pipefail
+
+(($# == 3)) || {
+  echo "usage: tools/upstream-early <omarchy git checkout> <reviewed tag> <new tag>" >&2
+  exit 2
+}
+src=$1 old=$2 new=$3
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+# Commands whose header declares they need root, at the new tag.
+git -C "$src" grep -l '^# omarchy:requires-sudo=true' "$new" -- bin/ | sed 's|^[^:]*:bin/||' | sort -u >"$work/sudo-commands"
+privileged() {
+  git -C "$src" show "$new:migrations/$1" >"$work/m"
+  if grep -qE '\bsudo\b|\bpkexec\b|\bas_root\b|omarchy-pkg-' "$work/m" ||
+    { [[ -s $work/sudo-commands ]] && grep -qwF -f "$work/sudo-commands" "$work/m"; }; then
+    echo yes
+  else
+    echo no
+  fi
+}
+
+printf '# Early warning: Omarchy %s\n\n' "$new"
+printf 'Migrations in pre-release `%s` that are new or changed since the reviewed `%s`, from the\n' "$new" "$old"
+printf 'source repository. Privileged ones will be held by the migration gate until reviewed.\n\n'
+git -C "$src" diff --name-status "$old" "$new" -- migrations/ >"$work/changes"
+if [[ ! -s $work/changes ]]; then
+  printf 'No migration changes.\n'
+  exit 0
+fi
+printf '| change | migration | privileged |\n|---|---|---|\n'
+while IFS=$'\t' read -r status path _; do
+  name=${path#migrations/}
+  case $status in
+  A) printf '| new | `%s` | %s |\n' "$name" "$(privileged "$name")" ;;
+  M) printf '| changed | `%s` | %s |\n' "$name" "$(privileged "$name")" ;;
+  D) printf '| removed | `%s` | |\n' "$name" ;;
+  *) printf '| %s | `%s` | |\n' "$status" "$name" ;;
+  esac
+done <"$work/changes"
+while IFS=$'\t' read -r status path _; do
+  [[ $status == A ]] || continue
+  printf '\n### `%s`\n\n```bash\n' "${path#migrations/}"
+  git -C "$src" show "$new:$path"
+  printf '```\n'
+done <"$work/changes"

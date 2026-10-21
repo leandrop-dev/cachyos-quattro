@@ -17,3 +17,9 @@ mkroot() {
   }
   cp -a "$fixture/." "$CQ_ROOT/"
 }
+
+# reviewed_release: the last Omarchy release reviewed in ledger/releases.tsv. The generated
+# ledger files (files.<v>.tsv, migrations.<v>.tsv, commands.<v>.tsv) are named after it.
+reviewed_release() {
+  awk -F'\t' '!/^#/ && $3 == "reviewed" { v = $1 } END { print v }' "$BATS_TEST_DIRNAME/../../ledger/releases.tsv"
+}
