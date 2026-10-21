@@ -10,6 +10,11 @@ fail() {
 }
 
 start=$(date +%s)
+# mirror5.krfoss.org and mirror.krfoss.org head the golden images' CachyOS mirror lists and
+# answered HTTP 503 for some .sig files on 2026-10-21, failing whole transactions; re-ranking
+# kept them first. Drop them so these scenarios test cachyos-quattro, not one mirror.
+sudo sed -i '/krfoss\.org/d' /etc/pacman.d/cachyos-mirrorlist /etc/pacman.d/cachyos-v3-mirrorlist /etc/pacman.d/cachyos-v4-mirrorlist
+
 CQ_USER_NAME="CQ Tester" CQ_USER_EMAIL="tester@example.invalid" ./bin/cachyos-quattro install --yes ||
   fail "install failed"
 echo "install took $((($(date +%s) - start) / 60)) min"

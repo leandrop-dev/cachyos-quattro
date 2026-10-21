@@ -1,5 +1,5 @@
 # Task: cli-update-uninstall-recover
-Status: pending
+Status: done
 Deps: 10
 
 ## Goal
@@ -31,12 +31,22 @@ Add `update`, `uninstall` and `recover` commands and the recovery guide.
 8. Run the VM scenarios on both images; `make check` passes.
 
 ## TDD Checklist
-- [ ] Write failing tests
-- [ ] Confirm tests fail (red)
-- [ ] Implement
-- [ ] Confirm tests pass (green)
-- [ ] Confirm no regressions
+- [x] Write failing tests
+- [x] Confirm tests fail (red)
+- [x] Implement
+- [x] Confirm tests pass (green)
+- [x] Confirm no regressions
 
 ## Notes
 Uninstall removes the desktop but cannot restore user files changed after install beyond `home.tar`; the summary says so.
 - Keep the pacman.conf block removal before `pacman -Rns cachyos-quattro`: pacman refuses to start while an `Include` names a missing file (verified in task 05, including for glob patterns), so the reverse order leaves pacman stopped. The package's `pre_remove` warns about this when someone runs `pacman -R` directly.
+
+As built (2026-10-21):
+- update: `omarchy-update` ends with `omarchy-update-restart`, which offers a reboot, so a check after it can come too late. `omarchy-hook post-update` runs `~/.config/omarchy/hooks/post-update.d/*` after migrations and before that offer; install's user phase and update both write `cachyos-quattro-verify` there, so the checks also run when the update starts from the Omarchy menu (a failing hook is reported, not fatal). update rebuilds and reinstalls the guard package whenever a shipped file differs from the checkout (`cq_guard_outdated`: ledgers, libexec, hooks, stubs, the generated drop-in), not only on a pkgver change, so a ledger update always lands before Omarchy's packages. `OMARCHY_PATH` is set for `omarchy-update` (its scripts read it with `set -u`; the first VM run failed in `omarchy-update-dev` without it).
+- install now writes `installed-packages.txt` in its `done` phase, so packages the system steps install are included; uninstall takes its backup from `installed` (`backup=`), not `backups/latest`, which a later manual backup would point at Omarchy's state.
+- uninstall unmasks a unit that was enabled before install and is masked now: Omarchy's `enable-services.sh` masks `NetworkManager-wait-online.service`, and the first VM run could not re-enable it.
+- recover restores `mkinitcpio.conf`, `mkinitcpio.conf.d`, `/etc/default/limine`, `limine-entry-tool.d`, `os-release` and `nsswitch.conf` (not every path in `etc.tar`), removes Omarchy's two drop-ins, and prints the rebuild command; the rebuild matters because `boot.tar` may hold older kernels than `/usr/lib/modules`. docs/recovery.md uses `limine-snapper-restore` (CachyOS's tool) for the snapshot route rather than `snapper rollback`.
+- `cq_pacman` now makes five attempts, 15 s apart: on 2026-10-21 `mirror5.krfoss.org` (first in the golden images' CachyOS mirror lists) answered HTTP 503 for some `.sig` files and pacman did not fetch those from the next mirror; each attempt keeps what it downloaded. The install-based VM scenarios drop the `krfoss.org` mirrors (re-ranking kept them first).
+- Test environment: the golden user's NOPASSWD rule does not let `sudo -v` (run by `omarchy-update-stay-awake`) pass while the stock `%wheel` rule asks for a password (`verifypw=all`); the uninstall scenario adds `Defaults:tester verifypw=any`, and docs/testing.md asks for it in future golden images. A real user has the timestamp from update's `sudo true`.
+- VM `limine-luks`: recover — Omarchy's real `omarchy_hooks.conf` (from the cached package) plus a rebuild fails verify with "no systemd-cryptsetup … the LUKS root would not unlock"; recover + rebuild passes verify and the system unlocks and boots. uninstall — after install and `update -y` (the post-update hook ran inside `omarchy-update`), uninstall removes 95 explicit packages (406 with dependencies) and the guard package; pacman.conf equals the pre-install copy; HOOKS and Limine settings match the baseline; after reboot sddm is disabled and os-release is CachyOS.
+- VM `limine-plain`: uninstall (after install and `update -y`) passes, including the unmask: Omarchy's `/dev/null` mask of `NetworkManager-wait-online.service` is removed and the unit is enabled after reboot; recover passes (verify fails on the broken HOOKS, passes after recover and rebuild). The `limine-luks` uninstall run predates the unmask fix.

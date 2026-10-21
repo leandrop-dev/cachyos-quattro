@@ -70,6 +70,11 @@ echo 'tester ALL=(ALL) NOPASSWD: ALL' | sudo tee /etc/sudoers.d/10-tester
 
 CachyOS enables ufw with incoming connections denied, so SSH needs the explicit rule.
 
+For golden images made from now on, also add
+`echo 'Defaults:tester verifypw=any' | sudo tee /etc/sudoers.d/11-tester-verifypw`: without it,
+`sudo -v` (which `omarchy-update` runs) asks for a password, because the stock `%wheel` rule
+is not NOPASSWD. The current images get it from the `uninstall` scenario instead.
+
 From the host, in the repository root, install the harness key (it asks for the
 `tester` password once). `ssh-copy-id` needs `~/.ssh` to exist on the host:
 
@@ -128,3 +133,7 @@ on success too.
 | 2026-10-21 | none (CLI preflight, backup, status) | 260809 | limine-plain | preflight-backup | pass |
 | 2026-10-21 | 4.0.6 | 260809 | limine-plain | install | pass |
 | 2026-10-21 | 4.0.6 | 260809 | limine-luks | install | pass |
+| 2026-10-21 | 4.0.6 | 260809 | limine-luks | recover | pass |
+| 2026-10-21 | 4.0.6 | 260809 | limine-luks | uninstall (with update) | pass |
+| 2026-10-21 | 4.0.6 | 260809 | limine-plain | recover | pass |
+| 2026-10-21 | 4.0.6 | 260809 | limine-plain | uninstall (with update) | pass |

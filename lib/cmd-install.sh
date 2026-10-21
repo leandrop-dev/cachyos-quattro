@@ -45,15 +45,35 @@ cq_install_plan_steps() {
 
 cq_install_backup_dir() { readlink -f "$HOME/.local/state/cachyos-quattro/backups/latest"; }
 
-# cq_pacman <args>: sudo pacman, retried twice; downloads from pkgs.omarchy.org can reset
-# mid-transfer. Safe to repeat: every call uses --needed, and a failed transaction changes nothing.
+CQ_POST_UPDATE_HOOK=.config/omarchy/hooks/post-update.d/cachyos-quattro-verify
+
+# omarchy-update runs ~/.config/omarchy/hooks/post-update.d/* (omarchy-hook post-update) after
+# migrations and before it offers a reboot, so the checks run there too, including when the
+# update starts from the Omarchy menu. A failing hook is reported, not fatal.
+cq_install_post_update_hook() {
+  local hook=$HOME/$CQ_POST_UPDATE_HOOK
+  mkdir -p "$(dirname "$hook")"
+  cat >"$hook" <<'EOF'
+# Installed by cachyos-quattro: check the CachyOS protections after an Omarchy update,
+# before omarchy-update offers a reboot.
+if ! sudo /usr/lib/cachyos-quattro/verify; then
+  echo "cachyos-quattro: a protection check failed. Do not reboot; run 'cachyos-quattro status'."
+  exit 1
+fi
+EOF
+}
+
+# cq_pacman <args>: sudo pacman, up to five attempts. Downloads fail intermittently (a reset
+# from pkgs.omarchy.org; HTTP 503 for .sig files from a CachyOS mirror, which pacman does not
+# fetch from the next mirror), and each attempt keeps what it already downloaded.
+# Safe to repeat: every call uses --needed, and a failed transaction changes nothing.
 cq_pacman() {
   local attempt
-  for attempt in 1 2 3; do
+  for attempt in 1 2 3 4 5; do
     sudo pacman "$@" && return 0
-    ((attempt < 3)) || break
-    cq_warn "pacman failed (attempt $attempt of 3); retrying in 10 s"
-    sleep 10
+    ((attempt < 5)) || break
+    cq_warn "pacman failed (attempt $attempt of 5); retrying in 15 s"
+    sleep 15
   done
   return 1
 }
@@ -122,7 +142,6 @@ cq_install_phase_base_packages() {
     cq_warn "omarchy-fish turns on fish_vi_key_bindings for every user"
   fi
   cq_pacman -S --needed --noconfirm "${pkgs[@]}"
-  pacman -Qqe >"$(cq_install_backup_dir)/installed-packages.txt"
 }
 
 cq_install_phase_system() {
@@ -160,6 +179,7 @@ cq_install_phase_user() {
   local pending
   pending=$(omarchy-migrate --status)
   [[ -z $pending ]] || cq_warn "pending Omarchy migrations after user setup: $(cut -f1,2 <<<"$pending" | paste -sd ' ')"
+  cq_install_post_update_hook
 }
 
 cq_install_phase_login() {
@@ -189,6 +209,9 @@ cq_install_phase_rebuild() {
 }
 
 cq_install_phase_done() {
+  # Everything install added explicitly, including packages the system steps installed;
+  # uninstall removes this list minus pacman-Qqe.txt.
+  pacman -Qqe >"$(cq_install_backup_dir)/installed-packages.txt"
   printf 'omarchy=%s\ncachyos-quattro=%s\ndate=%s\nbackup=%s\n' \
     "$(pacman -Q omarchy | cut -d' ' -f2)" "$(pacman -Q cachyos-quattro | cut -d' ' -f2)" \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(cq_install_backup_dir)" | sudo tee "$(cq_lib_dir)/installed" >/dev/null
