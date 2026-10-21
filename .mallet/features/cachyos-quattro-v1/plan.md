@@ -39,7 +39,7 @@ Every runtime script honours `CQ_ROOT` (default empty) as a path prefix so unit 
 - [x] 10-cli-install — end-to-end install flow [deps: 03, 06, 07, 08, 09] [parallel: no]
 - [x] 11-cli-update-uninstall-recover — update wrapper, uninstall and recovery docs [deps: 10] [parallel: no]
 - [x] 12-upstream-watch-ci — scheduled job diffing new Omarchy releases against the ledger [deps: 04] [parallel: yes]
-- [ ] 13-e2e-vm-validation — run every scenario on both golden images and record results [deps: 03, 11, 16] [parallel: no]
+- [x] 13-e2e-vm-validation — run every scenario on both golden images and record results [deps: 03, 11, 16] [parallel: no]
 - [ ] 14-upstream-foreign-base-proposal — draft an upstream opt-out proposal for user review [deps: 13] [parallel: no]
 - [ ] 15-other-bootloaders — systemd-boot and GRUB support (phase 2) [deps: 13] [parallel: no]
 - [x] 16-qt612-bridge — closed without code: Omarchy 4.0.6 renders correctly on Qt 6.12.0 (verified in the VM) [deps: 10] [parallel: no]

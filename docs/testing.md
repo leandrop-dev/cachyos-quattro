@@ -121,6 +121,21 @@ Each run:
 A failing run keeps its overlay and serial log in `tests/vm/run/`; `KEEP=1` keeps them
 on success too.
 
+### Scenarios
+
+| Scenario | What it proves |
+|---|---|
+| `smoke` | the golden image boots (and unlocks) and answers SSH |
+| `guard-package`, `txn-check`, `verify`, `preflight-backup` | each protection and CLI step on its own (tasks 05–09) |
+| `install` | full install from the internet; every check passes before and after reboot |
+| `plain-pacman` | `pacman -Syu` and `yay -Syu` are not stopped by Omarchy's guard; checks pass |
+| `shell-ui` | the Omarchy menu draws in colour (Qt 6.12); the screen locks and unlocks twice (host side: `shell-ui.host.sh`) |
+| `menu-commands` | every stubbed command refuses; `omarchy-plymouth-set-by-theme` rebuilds with CachyOS's HOOKS |
+| `kernel-update` | a kernel reinstall rebuilds through CachyOS's hooks; checks pass; the new kernel boots |
+| `hostile-release` | an unreviewed drop-in (via a dependency) aborts the transaction; a missing Include is caught; an unreviewed privileged migration is held |
+| `uninstall` | `update -y`, then uninstall restores CachyOS (pacman.conf, units, HOOKS, Limine) |
+| `recover` | an initramfs broken with Omarchy's HOOKS is restored and the machine boots |
+
 ## Results
 
 | Date | Omarchy | CachyOS ISO | Image | Scenario | Result |
@@ -138,3 +153,19 @@ on success too.
 | 2026-10-21 | 4.0.6 | 260809 | limine-luks | uninstall (with update) | pass |
 | 2026-10-21 | 4.0.6 | 260809 | limine-plain | recover | pass |
 | 2026-10-21 | 4.0.6 | 260809 | limine-plain | uninstall (with update) | pass |
+
+### Release gate, 2026-10-21 (commit 3c173c7)
+
+Every scenario on both golden images from one commit, Omarchy 4.0.6, CachyOS ISO 260809.
+
+| Scenario | limine-luks | limine-plain |
+|---|---|---|
+| smoke | pass | pass |
+| install | pass | pass |
+| plain-pacman | pass | pass |
+| shell-ui | pass | pass |
+| menu-commands | pass | pass |
+| kernel-update | pass | pass |
+| hostile-release | pass | pass |
+| uninstall | pass | pass |
+| recover | pass | pass |

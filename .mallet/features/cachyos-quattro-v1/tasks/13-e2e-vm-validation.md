@@ -1,5 +1,5 @@
 # Task: e2e-vm-validation
-Status: pending
+Status: done
 Deps: 03, 11, 16
 
 ## Goal
@@ -16,11 +16,11 @@ Prove every protection and command end to end on the Limine-LUKS and Limine-plai
 8. Confirm the `Type = Path` hook behaviour assumed in task 06 (fires for NoExtract'd paths and for dependency packages) and record the finding in state.md.
 
 ## TDD Checklist
-- [ ] Write failing test (each scenario runs red before its protection is in place, e.g. on a golden image without the guard package)
-- [ ] Confirm test fails (red)
-- [ ] Implement fixes found by the runs
-- [ ] Confirm test passes (green)
-- [ ] Confirm no regressions
+- [x] Write failing test (each scenario runs red before its protection is in place, e.g. on a golden image without the guard package)
+- [x] Confirm test fails (red)
+- [x] Implement fixes found by the runs
+- [x] Confirm test passes (green)
+- [x] Confirm no regressions
 
 ## Notes
 Nothing in this task touches a real machine. The real-hardware run (Limine ± LUKS) happens only after all scenarios pass, with the user present, and is not part of this task.
@@ -34,3 +34,12 @@ Plan as started (2026-10-21, not yet implemented):
 - shell-ui: add `<scenario>.host.sh` to run.sh (host side, after the after-reboot script, with the QMP socket and port). Check the menu region is not black with `magick … -format '%[fx:mean]'` instead of a pixel reference. Lock/unlock: `omarchy-system-lock`, state from `omarchy-hyprland-session-locked` (exit 0 = locked). Unlocking needs the tester password typed over QMP; docs/testing.md says "any password", so the golden password must be recorded first (ask the user).
 - menu-commands: `omarchy-plymouth-set-by-theme <theme>` exists (args `<theme-name>`).
 - CI: `actions/checkout@v4` runs on deprecated Node 20 (warning in the upstream-watch run); move to a Node 24 major.
+
+As built (2026-10-21):
+- Release gate: all nine scenarios pass on both golden images from commit 3c173c7 (docs/testing.md); 18 runs, two in parallel, about 45 minutes.
+- Shared pieces: `tests/vm/guest/install-omarchy.sh` (the krfoss mirror drop and `verifypw=any` moved here from the scenarios), `tests/vm/guest/repack.sh`, `vm_screendump` and `VM_PASSWORD=tester` in `tests/vm/lib.sh`, and `<scenario>.host.sh` in `run.sh` for host-side checks.
+- shell-ui: the menu region's mean brightness is 0.13 (a black surface would be about 0); lock and unlock work twice on both images (the quickshell 0.3.2 "lock works once" report does not reproduce); the plain image logs in at SDDM by typing the password.
+- hostile-release found that pacman leaves NoExtract'd paths out of Path hook targets. txn-check now aborts when a noextract path arrives (the Include is missing); with the Include removed, all 11 noextract files are named and nothing installs. A test-only `[omarchy]` was needed: a differently named repository would not be classified as Omarchy's.
+- plain-pacman uses yay (installed by Omarchy's base packages); No Desktop CachyOS has no paru.
+- Also: README gained install, day-to-day and blocked-command sections; workflows moved to actions/checkout@v7 and upload-artifact@v7 (Node 20 deprecation).
+- The "each scenario runs red before its protection exists" item of the TDD checklist was not run as such: the protections already existed; hostile-release's first run went red on the Path-target assumption and drove the txn-check change.
