@@ -1,0 +1,65 @@
+# Reviewed verdicts for Omarchy package files outside /etc/skel, and for /etc files
+# that omarchy-settings' .INSTALL overwrites. One exact path per row, no globs.
+#   noextract  pacman never installs it (listed in /etc/pacman.d/cachyos-quattro.conf)
+#   allow      installed as shipped
+#   restore    written by .INSTALL; the CachyOS copy is put back after each transaction
+# Rule: noextract when the file changes boot, the initramfs or the kernel command line,
+# or overrides a value cachyos-settings sets; allow otherwise. See docs/conflicts.md.
+# path	verdict	reason
+etc/mkinitcpio.conf.d/omarchy_hooks.conf	noextract	replaces HOOKS: drops sd-encrypt and sd-btrfs-overlayfs
+etc/mkinitcpio.conf.d/omarchy_vconsole.conf	noextract	changes initramfs contents (wraps add_file); CachyOS owns the initramfs
+etc/mkinitcpio.conf.d/thunderbolt_module.conf	noextract	adds a module to the initramfs; CachyOS owns the initramfs
+etc/limine-entry-tool.d/omarchy-defaults.conf	noextract	TARGET_OS_NAME, BOOT_ORDER without lts, cmdline additions, MAX_SNAPSHOT_ENTRIES=6
+etc/limine-entry-tool.d/omarchy-uki.conf	noextract	ENABLE_UKI=yes
+etc/sysctl.d/99-omarchy-sysctl.conf	noextract	overrides vm.* values cachyos-settings sets in 70-cachyos-settings.conf
+usr/lib/systemd/zram-generator.conf.d/90-omarchy.conf	noextract	duplicates cachyos-settings zram-generator.conf
+etc/tmpfiles.d/omarchy-zswap.conf	noextract	cachyos-settings already disables zswap (30-zram.rules)
+etc/systemd/system.conf.d/20-omarchy-nofile.conf	noextract	lowers the hard NOFILE limit cachyos-settings sets (10-limits.conf)
+etc/systemd/user.conf.d/20-omarchy-nofile.conf	noextract	lowers the hard NOFILE limit cachyos-settings sets (10-limits.conf)
+etc/systemd/system.conf.d/10-faster-shutdown.conf	noextract	overrides DefaultTimeoutStopSec=10s from cachyos-settings (00-timeout.conf)
+usr/share/libalpm/hooks/00-omarchy-update-guard.hook	allow	installed, then masked by /etc/pacman.d/hooks/00-omarchy-update-guard.hook -> /dev/null
+usr/share/libalpm/hooks/10-omarchy-hyprland-reload-pause.hook	allow	desktop: pauses Hyprland reload during omarchy-settings updates
+usr/share/libalpm/hooks/90-omarchy-hyprland-reload-resume.hook	allow	desktop: resumes Hyprland reload
+etc/docker/daemon.json	allow	docker defaults; no CachyOS counterpart
+etc/fastfetch/config.jsonc	allow	desktop
+etc/fonts/conf.d/50-omarchy.conf	allow	desktop
+etc/gnupg/dirmngr.conf	allow	keyserver list for user gpg; pacman-key uses /etc/pacman.d/gnupg
+etc/mise/conf.d/omarchy.toml	allow	desktop tooling
+etc/modprobe.d/omarchy-usb-autosuspend.conf	allow	usbcore autosuspend=-1; cachyos-settings sets no usbcore option
+etc/NetworkManager/conf.d/omarchy-wifi-powersave.conf	allow	wifi.powersave=2; no CachyOS counterpart
+etc/profile.d/omarchy.sh	allow	Omarchy environment bootstrap
+etc/sddm.conf.d/10-theme.conf	allow	desktop login manager
+etc/sddm.conf.d/10-wayland.conf	allow	desktop login manager
+etc/snapper/config-templates/omarchy	allow	template only; install/config/snapper.sh, which applies it, is skipped
+etc/sudoers.d/omarchy-dns	allow	NOPASSWD for omarchy-dns with three fixed arguments
+etc/sudoers.d/omarchy-passwd-tries	allow	passwd_tries=10
+etc/sudoers.d/omarchy-theme-browser	allow	NOPASSWD for omarchy-theme-set-browser-policy with a 6-hex-digit colour
+etc/sudoers.d/omarchy-tzupdate	allow	NOPASSWD for timedatectl set-timezone with a validated zone name
+etc/sysctl.d/90-omarchy-file-watchers.conf	allow	fs.inotify.max_user_watches; cachyos-settings does not set it
+etc/systemd/logind.conf.d/10-ignore-power-button.conf	allow	HandlePowerKey=ignore; no CachyOS counterpart
+etc/systemd/logind.conf.d/20-inhibit-delay.conf	allow	InhibitDelayMaxSec=15; no CachyOS counterpart
+etc/systemd/oomd.conf.d/10-omarchy.conf	allow	oomd pressure defaults; cachyos-settings sets per-slice values only
+etc/systemd/resolved.conf.d/10-disable-multicast.conf	allow	LLMNR and MulticastDNS off in resolved; no CachyOS counterpart
+etc/systemd/resolved.conf.d/20-docker-dns.conf	allow	DNS stub for the docker bridge
+etc/systemd/system/cups-browsed.service.d/10-omarchy.conf	allow	sandboxes cups-browsed
+etc/systemd/system/docker.service.d/no-block-boot.conf	allow	docker does not delay boot
+etc/systemd/system/plocate-updatedb.service.d/ac-only.conf	allow	index only on AC power
+etc/systemd/system/user@.service.d/10-faster-shutdown.conf	allow	user manager stop timeout; no CachyOS counterpart
+etc/sysusers.d/omarchy-cups-browsed.conf	allow	system user for cups-browsed
+etc/tmpfiles.d/omarchy-nopasswd-sudo.conf	allow	removes Omarchy's temporary sudo grants at boot
+etc/xdg/kitty/kitty.conf	allow	desktop
+usr/lib/environment.d/10-omarchy-fcitx.conf	allow	desktop input method
+usr/lib/systemd/system/plocate-updatedb.service.d/10-omarchy.conf	allow	plocate index options
+usr/lib/systemd/system-sleep/unmount-fuse	allow	unmounts gvfs FUSE mounts before sleep
+usr/lib/systemd/user/app.slice.d/10-oomd.conf	allow	oomd policy for desktop apps
+usr/lib/systemd/user/bt-agent.service	allow	desktop user unit
+usr/lib/systemd/user/omarchy-crash-watch.service	allow	desktop user unit
+usr/lib/systemd/user/omarchy-fcitx5.service	allow	desktop user unit
+usr/lib/systemd/user/omarchy-migrate-notify.service	allow	desktop user unit; runs omarchy-migrate --pending (the gate)
+usr/lib/systemd/user/omarchy-recover-internal-monitor.service	allow	desktop user unit
+usr/lib/systemd/user/omarchy-sleep-lock.service	allow	desktop user unit
+usr/lib/systemd/user/omarchy-tailscale-receive.service	allow	desktop user unit
+usr/lib/systemd/user/omarchy-update-user-notify.service	allow	desktop user unit (alias of omarchy-migrate-notify)
+usr/local/share/wayland-sessions/omarchy.desktop	allow	desktop session entry
+etc/os-release	restore	.INSTALL rm -f + cp -f; identity is CachyOS's
+etc/nsswitch.conf	restore	.INSTALL cp -f; CachyOS's resolver order

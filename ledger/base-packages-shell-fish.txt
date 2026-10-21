@@ -1,0 +1,2 @@
+# Extra packages when the login shell is fish (CachyOS default).
+omarchy-fish  # mise, zoxide, starship and fzf setup for fish; note it enables fish_vi_key_bindings system-wide

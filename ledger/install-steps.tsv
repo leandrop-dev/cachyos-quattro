@@ -1,0 +1,54 @@
+# Verdicts for every script Omarchy 4.0.6's install/{config,hardware,login,post-install}/all.sh runs,
+# in the same order. Paths are relative to /usr/share/omarchy/install. Hardware scripts are
+# gated on the hardware they name and do nothing elsewhere.
+# script	verdict	reason
+config/theme-system.sh	run	desktop theme links
+config/browser-policy.sh	run	Chromium managed policy under /etc/chromium/policies
+config/increase-lockout-limit.sh	run	pam_faillock deny=10 unlock_time=120 in /etc/pam.d/system-auth and sddm-autologin
+config/lockscreen-pam.sh	run	PAM for the lock screen
+config/fix-powerprofilesctl-shebang.sh	run	desktop fix
+config/ssh-command-path.sh	run	adds PATH to /etc/security/pam_env.conf when missing
+config/ssh-keepalive.sh	run	ssh client keepalive
+config/docker.sh	run	docker setup
+config/snapper.sh	skip	replaces CachyOS snapper retention (NUMBER_LIMIT 50/15) with Omarchy's 5 and touches limine-snapper-sync
+config/enable-services.sh	run	enables cups, avahi, resolved, NetworkManager, power-profiles-daemon, sddm, oomd, docker.socket; CachyOS already uses NetworkManager with resolved
+config/firewall.sh	run	keeps existing ufw rules (SSH stays open), same deny-incoming default, adds LocalSend and Docker rules
+hardware/asus-rog.sh	run	installs asusctl on ASUS ROG
+hardware/framework16.sh	run	installs qmk-hid on Framework 16
+hardware/dell-xps-touchpad-haptics.sh	run	Dell XPS touchpad package
+hardware/surface.sh	run	installs linux-firmware-marvell on Surface
+hardware/network.sh	run	disables iwd and systemd-networkd (both disabled on CachyOS; NetworkManager uses wpa_supplicant)
+hardware/set-wireless-regdom.sh	run	wireless regulatory domain
+hardware/fix-fkeys.sh	run	modprobe option for Apple-style keyboards
+hardware/fix-synaptic-touchpad.sh	run	modprobe option for Synaptics touchpads
+hardware/bluetooth.sh	run	enables bluetooth
+hardware/nvidia.sh	skip	installs nvidia-open-dkms next to CachyOS's chwd driver and writes nvidia.conf early-KMS MODULES
+hardware/vulkan.sh	run	Vulkan drivers
+hardware/intel/video-acceleration.sh	run	Intel VA-API packages
+hardware/intel/lpmd.sh	run	Intel low-power daemon
+hardware/intel/thermald.sh	run	thermald
+hardware/intel/ipu7-camera.sh	run	Intel IPU7 camera packages
+hardware/intel/fred.sh	skip	adds fred=on to the kernel cmdline via /etc/limine-entry-tool.d on Panther Lake
+hardware/intel/fix-wifi7-eht.sh	run	modprobe option for Intel Wi-Fi 7
+hardware/intel/sof-firmware.sh	run	sound firmware
+hardware/dell-xps13-ptl-speaker-firmware.sh	run	speaker firmware
+hardware/asus/fix-asus-ptl-display-backlight.sh	skip	adds xe.enable_dpcd_backlight=1 to the kernel cmdline via /etc/limine-entry-tool.d
+hardware/asus/fix-asus-ptl-b9406-display.sh	skip	adds xe.enable_panel_replay=0 to the kernel cmdline via /etc/limine-entry-tool.d
+hardware/asus/fix-asus-ptl-b9406-touchpad.sh	run	libinput quirk
+hardware/asus/fix-z13-touchpad.sh	run	udev rule
+hardware/framework/qmk-hid.sh	run	udev rule
+hardware/apple/fix-spi-keyboard.sh	skip	writes MODULES=(...) with '=', replacing the initramfs module list
+hardware/apple/fix-suspend-nvme.sh	run	systemd unit for Apple NVMe suspend
+hardware/apple/fix-t2.sh	skip	T2 Mac kernel, cmdline and initramfs changes; out of scope
+hardware/apple/fix-brcmfmac-supplicant.sh	run	modprobe option for Broadcom Wi-Fi
+hardware/lenovo/fix-yoga-pro7-bass-speakers.sh	run	modprobe option for speakers
+hardware/fix-bcm43xx.sh	run	Broadcom Wi-Fi package
+hardware/fix-surface-keyboard.sh	skip	writes MODULES=(...) with '=', replacing the initramfs module list
+hardware/fix-yt6801-ethernet-adapter.sh	run	ethernet driver package
+hardware/fix-tuxedo-backlight.sh	run	modprobe option and package for Tuxedo backlight
+hardware/speaker-tuning.sh	run	speaker tuning packages
+hardware/pacman.sh	skip	on T2 Macs appends [arch-mact2] with SigLevel = Never to /etc/pacman.conf
+login/sddm.sh	run	removes gnome-keyring from /etc/pam.d/sddm
+post-install/pacman.sh	skip	overwrites /etc/pacman.conf and the mirrorlist
+post-install/udev.sh	run	reloads udev rules
+post-install/localdb.sh	run	updates the locate database

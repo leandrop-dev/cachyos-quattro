@@ -24,7 +24,7 @@ trap 'vm_overlay_cleanup "$passed"' EXIT
 vm_overlay_boot "$image" "$scenario"
 
 vm_log "copying working tree to ~/cq"
-tar -C "$REPO_DIR" -c --exclude=./.git --exclude=./tests/vm/images --exclude=./tests/vm/run . |
+tar -C "$REPO_DIR" -c --exclude=./.git --exclude=./build --exclude=./tests/vm/images --exclude=./tests/vm/run . |
   vm_ssh "$port" 'rm -rf ~/cq && mkdir -p ~/cq && tar -x -C ~/cq'
 
 vm_log "running scenario $scenario"
