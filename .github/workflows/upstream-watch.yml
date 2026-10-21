@@ -106,4 +106,5 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ steps.check.outputs.tag }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: tools/upstream-issue "Early warning: Omarchy $TAG" early.md "$RUN_URL"
+        run: |
+          tools/upstream-issue "Early warning: Omarchy $TAG" early.md "$RUN_URL"
