@@ -1,0 +1,120 @@
+1778623107.sh	a241f1e25c123fda8c95090f292364ce4e514bfdc154a08169a6e340feb06e9a	yes	Install MPRIS support for mpv
+1780057136.sh	1db3b17ef227a36d153722704362e0235ff1d334ffad10626ea6394fb91e5f67	no	Make Shift+Enter distinguishable for terminals and Codex
+1780294774.sh	b1b0bc4311d9fe3764de4a9c27432a97232c66fae20d24c917ee366b90d2c637	no	Remove leading zero from bar clock date
+1780517689.sh	7ec9fc5242d04a7a4ca6517ab8f3092bc5d286018b71d1aef97e0456b0c840c1	yes	Add yt-dlp download extension (Alt+Shift+D) to Chromium-based browsers
+1780739888.sh	4171e59eb32d3bc7b79657be59bbf4f174fc64f30b7090713ad0a6124e339c74	yes	Use dua for Disk Usage TUI
+1781043107.sh	957f724d6c36697f858c3876365a00b6d226e9712be276c03fdf89650aae3dc2	no	Move current Omarchy theme state to ~/.local/state
+1781063758.sh	df2699b76f61e79fab65f8db3325daff8f172e82e9d94a5869222e4172c1223f	no	Update Hyprland Lua entrypoint to load Omarchy bootstrap
+1781158082.sh	ba1fa06b0faa1cd8bdc512dc2cd432022155b1272e0bebf6ea1cfd5207a6a306	no	Relink Neovim theme to Omarchy current state
+1781286586.sh	ef1a86368753f8f2ac7ff982b16e9c9eab74ec58622b0b8463c4aafb67505d3c	yes	Replace Satty with Tensaku
+1781485962.sh	92be3a71bb52f634394ac84e3f88902c600024e9924b4c400726b22d9cbeaebe	no	Move stock Hyprland user overrides into package defaults
+1781587663.sh	ee9db61af45b711885581f8594b21317174e7380b706871e77913b988cceaf8d	no	Enable secure remote Neovim clipboard support
+1781793381.sh	d458f8eac90dca05c8fb5e977c0b8384214b5a19ea612b2d09f6b14a682f06a1	yes	Auto-mount removable drives by default with udiskie
+1781984677.sh	3a0353ebd4ebae36b1ad664c5dad9f89a18ca7f8cf8face301550b7620043480	yes	Normalize Snapper snapshot services
+1782002156.sh	b26d4ac1d5f6fa6c68510319b4981eb56bb446999effe5df905788f02e973691	yes	Retire systemd-networkd in favor of NetworkManager
+1782049344.sh	b369d816aac95c209a8e6a39d52000b8b851c469b122d05393def16af27f7c5c	no	Disable Limine Snapper warning notifier
+1784401744.sh	1b1c29f7ffe21ec87f62ae1d947d8ba09cb07c78b1952367a02f00e94cc0d366	yes	Backfill hardware support and tmux settings added before Omarchy quattro
+1784476564.sh	0106e33f6dd8aa7261d31b436e1e06378cc9bfb24125a8714eb5db26ee8abe14	yes	Keep non-Latin keyboard layouts out of the initramfs so the LUKS passphrase stays typeable
+1784479832.sh	70afbf89657237b628bed35d007a98d9c39368f5ea02e6fb539758884b26c9c4	no	Enable Kitty cwd lookup through a remote control socket
+1784508556.sh	b8e8bb5583cff8212898900997fbce8c8e3072327b6b687b44f19aa31424a8cd	no	Pin browser password store to gnome-libsecret (prevents cookie/login loss on Hyprland)
+1784510887.sh	782a955124d9a4caf6382707c0e461c4c1d35f124bba9c236fbd052b397024cc	yes	Switch Brave Origin from the beta to the stable release
+1784521870.sh	942d6352430391da37319edec1a859202613ffdfcab047c15bfc5c5c4bad6253	yes	Stop the migration notifier from re-triggering itself in a loop
+1784568652.sh	c3ac13f831ae5b523b958c54aba40ed63233fa99a15da82d3d73eb63a09b40b8	yes	Stop waiting for the network before showing the desktop
+1784672586.sh	3ece6a4467210783745423abcf2554aae6c997285cbb0ef025534c8d0dba7fcd	yes	Switch to the Omarchy quickshell-git build so shell restarts wait for instance exit
+1784763917.sh	fe3f5d4f8db1065d9dbd38627578803c397ff55875a4a9ce51a4b263fb700600	no	Install the native messaging host for the Chromium Copy URL extension
+1784767406.sh	3a19f46dcc3dd442360d89302a236f3878820ee2fee0fe5136a365a2cb7a5e36	no	Remove the obsolete Voxtype Hyprland toggle
+1784809452.sh	6a942278438c24d4fc1a7e20df19ad7f0e88ac8fcacbe44bad503c58f3a7ec9a	yes	Remove Snapper timeline snapshots leaked by earlier defaults
+1784818437.sh	e3cbec96d9a62e9e2650591c0743b362ce2808652256b2a90309eb3298b8d9a1	yes	Gate sudo and polkit fingerprint auth behind the lid state (password when the lid is shut)
+1784909971.sh	0ef24ac1a78690a1c7b1c4cb09d92f05f48c190b12df75a9b743b9d38cd3dcb6	no	Regenerate mise wrappers to stop them recursing through PATH
+1784914435.sh	c173aea1f0cd3093d07ec420cc73bbdbffd8529087e979c8ba873ea83d8fb726	yes	Keep Wi-Fi power save off for lower latency
+1784917531.sh	34d0bf03b7d628f736f35182fc180e3b629b97255d9e67b4c4703435a1071966	yes	Unpack the initramfs synchronously so Plymouth survives early boot
+1784960000.sh	f4215d430842f747152d7ce569540341a4f420538e7c1d91f27248f2e5a65ecf	yes	Install the speaker tuning for XPS 2026 14/16
+1784961000.sh	f58126e21c59744354a102819b058c7f587adc0c9f2663189445488dfb328ae3	yes	Tune reclaim for swap on zram
+1784970000.sh	084e8e2c054d18f214c2d172ff60f6c4bacf7652e82d196fab76dc6cc12bf8d1	yes	Give the pre-suspend lock a window it can actually finish in
+1784989000.sh	57ee2e1692488baf2436159d034d4f5f799b05f5433b3d278aa395663f7ae612	no	Move the bar indicators to the left of the clock
+1785002349.sh	8fdaff61483c562b6961fdba43af239210b42fe81f73622c25b5c1c5d03a2087	no	Repair Neovim theme symlinks the earlier relink missed
+1785013000.sh	b4d1e97ec81e8f63bc596283e2cf7f60737e35a70e78114333e15785ce4d4ffc	yes	Move zram tuning to a vendor drop-in
+1785090473.sh	46633bfcb5b9256e400d5479f3316f7f7dd4e55d11580822008b687ad75c63ee	yes	Repair fingerprint support left without a libfprint
+1785095882.sh	244163257e20ba6fea5c1133bdbc01cfb629bbcb6c1dfed36140e305c7dc5a76	yes	Only check for pending migrations at login, not on every package update
+1785101000.sh	1e92d8159a7739a8be029717abab62b5695cfaa570d2a982db48c9bbd452c42a	no	Save incoming Taildrop files to ~/Downloads
+1785166747.sh	ac3eb47fbd7e01c5d39bda2f719a3b9a0df50b25aad3ad2df9161878cbb9c361	no	Register the native messaging hosts for the bundled Chromium extensions
+1785167800.sh	90c9033be8cb8cb83e99af6416f0766ce29b55b39a8cf9e1ceacba7a0f7edad8	no	Supervise fcitx5 so CapsLock compose sequences can't silently die
+1785189600.sh	5cb15c2d84e97ac50c727836c78839039daffd5e06644773135960469624517f	no	Remove the tmux alert hooks and its bar indicator
+1785273276.sh	498f462c56ec3b6c0deba9b91167d662743e6e3b76670883df3a607c3ce9258a	yes	Rename the T2 Mac BCE module (apple-bce → t2bce) and repair the boot image
+1785344985.sh	d95d381ec037398e5b16421f3b4c9fb094a03f7ede480c48f0925e2374324de8	no	Add the agents widget to the bar
+1785351479.sh	cc064884af736e7579917b6597a797315998b7e5f33eea3033c49ccb6bf818e1	yes	Drop Kvantum now that Qt apps follow the theme through the GTK platform theme
+1785424256.sh	509553fa03774a95f16435e64b2f4c08cc1d938339f865acead5f06dc6bc6775	yes	Let systemd-oomd kill a runaway app instead of the whole session
+1785511354.sh	5bd3bb7a2a12ef4cbec91cc6defd3f21830d40a73510f0ed1e19ff42f4c1e2d6	yes	Install qrencode for Wi-Fi QR sharing
+1785543725.sh	79d06a25b5e5f1a3c358cf2908be4c45eebfbd56fb9dc7c8b1941235af3c43cf	no	Add WhatsApp Slim extension to Chromium-based browsers
+1785591762.sh	0f531e530b4a94a7f1d7228c0999b900dbbf8b05211cbae1743deb378696e90f	no	Add WhatsApp Slim extension to Brave Origin flags for existing installs
+1785608166.sh	e1531373f9479544125dcd9983db417eb4daf47d548a13bef5b4dead8ae38674	no	Repair the pre-suspend lock monitor's graphical session environment
+1785608251.sh	e270f6778f9b392a436d349b4d3319e06e1fa616b7134d2b28e5420c949be962	yes	Install ddcutil for external monitor brightness control
+1785617047.sh	b3ec0e14f60c28203d99177d4e6e5db769941b1645903db554dfa9d3492c64a6	no	Install oh-my-pi (omp) via mise wrapper
+1785633225.sh	9b8437e61b905ace5d73f5b9eacaff3a5917165a91b18b068ee578c9d13b3803	no	Speed up mouse scrolling in foot
+1785637426.sh	872a1d2e068dcff7f6ef9a7fdcbd9f41ef4513dc67179a894372a58ab9270912	yes	Replace GNOME Calculator with Omacalc
+1785846769.sh	cd70541bada47a401ad7cc83d609ddc85ba59fb2ece3cd07f11d5f611da66bab	no	Install default coding agent mise wrappers
+1785944594.sh	462f92c4de3e0a21abbd5a804911956999c89ff638380bf78e87c56d7a07629a	yes	Update T2 Mac suspend, Touch Bar, and fan defaults
+1786098807.sh	656f95f07fea01f66ccdec40c06640774500a0f7ded019d3b0dfe2adc87be9e4	no	Relink agent skill symlinks to default/agents/skills/omarchy
+1786099804.sh	1f56248f7e8493652620f9e1a27c2655bacc5f0432e86677dabbc69684cccd7b	no	Rename the model usage widget to agents and prime its data files
+1786137597.sh	79138fe9e6f95396b9269ce418678d4286a7334900f53f3519df2975b69e0883	no	Re-run the T2 defaults migration that a broken hardware check skipped
+1786181929.sh	d0bfc92e590595dda321a8d1dc5c8c854c6780054aeb29b4f8609c1803fba0f6	yes	Give SSH commands the user-level tool paths via the PAM environment
+1786183928.sh	0ee0af26131c67a7c6be786316d5da619cb1713c4b38a3fcaa3fab8d0301d6d0	no	Refresh mise stubs so tools take new releases immediately
+1786273938.sh	7c228f6e86c7500a8de429543f1ca7c58f04368c00cee1ee333e2140bb64b4be	yes	Install herdr from the Omarchy package repo and seed its config
+1786278735.sh	a7c6aefd93eb521c195eddcfbc888e92647e074e8b51170dabdc299fd8c33821	yes	Detect dropped SSH connections quickly instead of leaving terminals hung
+1786279107.sh	6ae8f2e4b0728d636346e357b509a49432b96cf9ed1ebf9f719ccb28c3922339	no	Add the keyboard layout widget to the bar
+1786355450.sh	6842f84af0329d40077041707e14b4c3ff0e5654f611f836e49948b373482f89	yes	Replace terminaltexteffects with ttfx
+1786380259.sh	e0f70e82ed6cf2ea71a1f9684e791b273d156a744555888e52db8744e231959c	yes	Remember Bluetooth on and off through the rfkill soft block
+1786386460.sh	d2b3190a0ebc504afa3f3e4191f8cabec7a99ec365f5f578dec496a36b944833	yes	Generate image picker thumbnails with libvips
+1786391100.sh	65ac04683858d6e92b8b89f75c66e42baddd9d055b8d277e977f3babec6afdce	yes	Run the WPA handshake in software on Macs with Broadcom Wi-Fi
+1786447584.sh	242e704e869e87f38b260b065b980ca989660a19153ebaa2dc5d1b48e9f8bf49	yes	Install QR code scanning support
+1786451567.sh	c2c94582895dda94b30f5fdd7dd2eb3732b16d6349505a28608b54c057a2c0f4	no	Repair theme symlinks the state-move migration left dangling
+1786482992.sh	0864233cb1d9b6e95058555533fe5a0064722bf885d781db5229d6444d60183a	yes	Rebuild the boot image when it predates the Limine kernel command line
+1786517850.sh	c3779a2239113694a2e11a219da03f38b6f7c36c7b314165eb451daba74f2532	no	Drop the retired notification image cache
+1786539345.sh	07a72a24c32bb24cfd1b8607b6dbde2a1d7488abc7b237fedf0eaf6e2eeafeb3	no	Announce process crashes and offer an AI diagnosis
+1786549201.sh	54d465910c57a72b43ed5829114e057fcd6e40860f452ce737cfde2010914e4f	no	Invite existing installs to pick a default agent
+1786567036.sh	cc0a19ab8708030d817b838b1fe09c11ec64d908fb5e763d8ae55b686119a707	yes	Unmask wpa_supplicant so NetworkManager can bring wifi back
+1786605598.sh	89ef0645ed599c8e1e514c58c216611b166c6b07b4390e2fe645841a26fa148b	yes	Rebuild the initramfs so NVIDIA-only systems shed nouveau's unused GSP firmware
+1786643346.sh	8be667fe62f5443e34e157f195eba50eac331e68263c2f66591b57fdcb0f07d5	no	Repair the Copy URL shortcut for profiles that predate its pinned extension id
+1786782461.sh	bd217bde4299b47f52a57ab8d7cdfd6592e118c93f10210054c5cc3137ae2ff2	no	Remove the literal \\n[text-bindings] line an earlier migration wrote into foot.ini
+1786952219.sh	be46d562fc277642889b55e9b26f57d3177fe83d357a9178ba12ac88a5d1dc03	yes	Switch mise to the mise-bin package from the Omarchy repo
+1787133200.sh	a6d92d46eac7cf4e8c7eaf56c2a817144735df7cc3f923978667db1e038493df	yes	Add webp decoding to the shell
+1787215483.sh	b130c5920b6504875da721c108425ca1dd31afe296f885286a90a5aa63ccabd7	no	Stop mise upgrades from pruning versions still in use
+1787399318.sh	0550769617a7ea54bb945c12496575cd2f7c647b8b976cd437b7eccd7ae4772a	yes	Switch back to the packaged quickshell now that 0.3.1 kills synchronously
+1787481315.sh	75df8e60ac43d0b4994f9a06671cd200f9f07c6b6c50cc04acef2819bcf689ec	no	Re-stage the current theme so an installed theme's code is dropped
+1787494718.sh	0c925531f6be01b92f6dc1e272a380daa512fb64e1358585b9c8edfb141a055d	yes	Take ownership of the FIDO2 authfile so it cannot be rewritten without root
+1787515927.sh	1eea7f579bf104eb9f9c852ae30e001ffb6d86b2f6a2ea02cbdff53ae0e0bb55	no	Stop world-writable Chromium and Firefox policy directories
+1787580187.sh	18ccba2ca014a049b174ab4e4f1918048775d8924f228452a7c34ff35a1b5d60	yes	Move this install to the opt-in docker group default (the group is root-equivalent)
+1787589206.sh	63fd8e9a02097d863fd160f0003af724d0086104fff4ab5efb58b560cac0c812	yes	Require signed packages from the Omarchy repository
+1787618700.sh	3b9adc0d7c9b941b2032e3c035ae2e4cc270b285921c368a317a163b649905a4	no	Store Hyprland input-device names as data instead of generated Lua
+1787691200.sh	ed5608805fce3477c0cd3798a5e06268a87b7ea708dc8aa84cda6a1614e6fed1	yes	Skip Chromium's new first-run EULA on machines already on Quattro
+1787760281.sh	00cfad01c19b6681a819ec6808cb50ed755202439bfa1f8b78e13065f86f6428	no	Install the Hermes CLI wrapper for existing installs
+1787815267.sh	7d8bd46c8dbc0cd30561a0e8c644e02685204e3e599690780acfbac391021e97	yes	Separate printer discovery from root and print-filter access
+1787843905.sh	26d382b135be3ceeb06bfd60bb82baaedaed356b95a77502f95b1eb98cd4b6ae	no	Link Omarchy agent skills into Hermes skill directories
+1787865477.sh	c83ad7b2d40bad20603166aa526e888c48174d006047be5cba4f32a2c3d1974a	yes	Drop the default input group grant, which allowed unprivileged keylogging
+1788009111.sh	e23e06ae9e1b514e7507841e1860f706ef7b7cd199736dfac634492e4d2b13c8	yes	Temporarily remove automatic printer discovery
+1788025225.sh	d29bba2a2839fb3acef89870a9d021aa5965b905f12484266b95cd398692b415	yes	Remove privileged files left behind by retired Omarchy installers
+1788102906.sh	022fe18a9cfe38620b647311ca2e93af8e9e9d6cd591471d65fe9b21274c9e7d	yes	Repair legacy XCompose and remove vulnerable Omarchy 3 power udev rules
+1788112314.sh	b08f8dc8bfab9b32e753f74be7fc0e27fb0ebfe82b52bdb342cbde70c866d2c7	yes	Point rc-channel installs at the rc package repository
+1788124236.sh	7d600316b3146e8b56c65caae393df8222b5cbfdbfffa46e0c9ae8bfde781b5b	yes	Disable SSH password authentication, or sshd itself when no key is authorized
+1788577553.sh	aa3d55480497aabc5bf8ad216513c70074e98de13a20c893151038232c9713ce	no	Install Cursor CLI via mise wrapper
+1788619462.sh	9b88a155cd4bace42ea1a10f6c12a558544926f00671e1e741b8977b856ca78f	yes	Hand Hermes Desktop the Omarchy theme as a skin
+1788662350.sh	6c40ba5ec6c0a90c583d6067a733ad315c7a6e0e3ba302c39396eb3e829fe965	yes	Repair user-owned system-sleep hooks and hybrid GPU service configuration
+1788724825.sh	2ab07d502a4a5c424293204274e43c7b338717392ebaee64cbd53d5c8c3e235e	no	Install Muse Code via mise wrapper
+1788745941.sh	4367fefeeb8efe2d5d070f4d2de904338e4665b54589c89595bfc5e127dcf140	no	Update Kitty configuration
+1788848726.sh	1e15718a79ce287ef2f167ef1584e9ba5874f8c7d4c9464e97cc268e3c7b2342	no	Retire the stock user icon font missed by the Quattro upgrade
+1788996284.sh	31508b271d508f2c60abbef4b50ff4cf8280ea1195290b14c2f359af880ab6ad	no	Repair remote Neovim clipboard yanks and paste
+1789095456.sh	5d2037abbce10d1dfa1a53f176fbda8ebdb502a546766263590deb24eb8d1c45	no	Remove automatic project bin directories from PATH
+1789130779.sh	ffaed427a09dda6d10b4222913d2eb0046a5d013b994ef98ce398ea54982eddb	no	Keep the KEF LSX II LT USB sink from suspending
+1789325478.sh	34f5374c4d92eb0f943a1272b58294c9d7265ca3d91a6b3609a44278f8480955	yes	Install the Omarchy kernel and make it the first Limine boot entry
+1789444024.sh	774584d820d0e4ac2940fb4d465b84ac4facf0a296438c9f2681b9efccc6f11e	yes	Install missing headers for the Omarchy or T2 kernel
+1790017600.sh	7b338f6d7cadc30cc3577b343f7639d51ffbe7c9ddeb0b39dbf352aec6fdffed	yes	Retire the Hermes that mise built; Hermes now updates itself
+1790114905.sh	6123497d64fb4c30823ee6d1868888369e8b3ed4b8f217365a77902f2630f6e7	no	Ask RTKit directly for the speaker tuning's realtime priority
+1790282866.sh	6eb1d98a981c5d5dc545c12f9129aa52df682608621b1e988d70eaa5e0f8de12	no	Apply the NVIDIA video driver fix on hybrid laptops
+1790397381.sh	f7bd39bbc6ab60d5c44c993cd7fe8a6cd17c1d5fb5141df789819483f47235c6	no	Retire the OpenClaw move that 4.0.5 shipped too early
+1791265613.sh	84a67d29efdf31b45546e0209441a92087590600cbd8d713700caebe14624d51	no	Install the Dell XPS 13 Panther Lake speaker firmware
+1791403252.sh	fb380a285eca3a1f7e38cf3cc88c523f2cf93c6559486ec8bb17302f923aa0e6	yes	Prioritize the Omarchy package repository over Arch repositories
+1791581004.sh	18066ee208c7db676b78353dd9caca25640bf44fa7663371cea3f1a814fd3eb8	yes	Stop the boot from waiting on a black screen for the console to answer
+1791621765.sh	c0510b53de9daf42f0b82846d309442df53635f1b9695b90d1a3d9f4c0342b3d	yes	Rebuild the boot image so a non-Latin keyboard layout stays out of the LUKS prompt
+1791934674.sh	7675ed4b31835fbe1df8e1cd0c3e0366124fce29d5837919822d746ee977193f	no	Route links from every app through the running default browser
+1791935188.sh	f281278e5a415f1f8c955d6bca6de0b62bcd6b586ce75bf62b24638ad1f15782	no	Stop browsers asking to be the default behind Omarchy's link routing
+1792334754.sh	c65c1650f9087404817348f88afc9e21deb2ded61f4b85b81e1d8361c5cbcdfb	yes	Move OpenClaw to a self-updating install under ~/.openclaw

@@ -1,0 +1,2 @@
+# Packages from install/omarchy-base.packages (4.0.6) not installed on CachyOS.
+tldr  # tealdeer (required by cachyos-fish-config) provides and conflicts with tldr

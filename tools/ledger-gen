@@ -1,0 +1,112 @@
+#!/bin/bash
+# Generate the machine-readable ledger for one Omarchy release.
+#
+#   tools/ledger-gen <version> <outdir>
+#
+# Downloads omarchy.db and the omarchy and omarchy-settings packages for <version>
+# from pkgs.omarchy.org into build/ledger/<version>/, checks their signatures against
+# Omarchy's signing key, extracts them there (never executing anything from them),
+# and writes to <outdir>:
+#   files.<v>.tsv       path  package  backup(yes|no)  sha256 or symlink:<target>
+#   install.<v>.txt     each package's .INSTALL scriptlet, verbatim
+#   packages.<v>.tsv    package  field  value   (depend, conflict, provides, replaces)
+#   migrations.<v>.tsv  name  sha256  privileged(yes|no)  first echo line
+
+set -euo pipefail
+
+(($# == 2)) || {
+  echo "usage: tools/ledger-gen <version> <outdir>" >&2
+  exit 2
+}
+version=$1
+outdir=$(mkdir -p "$2" && cd "$2" && pwd)
+repo_url=https://pkgs.omarchy.org/x86_64
+signing_key=40DFB630FF42BCFFB047046CF0134EE680CAC571
+packages=(omarchy omarchy-settings)
+# Paths a CachyOS system cares about; everything else is desktop payload.
+watched='^(etc|usr/lib|usr/local|usr/share/libalpm/hooks|boot)/'
+
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+work="$root/build/ledger/$version"
+export GNUPGHOME="$root/build/ledger/gnupg"
+mkdir -p "$work"
+install -d -m 700 "$GNUPGHOME"
+
+fetch() {
+  [[ -s $work/$1 ]] || curl -fsSL -o "$work/$1" "$repo_url/$1"
+}
+
+fetch omarchy.db
+gpg --batch --quiet --list-keys "$signing_key" >/dev/null ||
+  gpg --batch --quiet --keyserver hkps://keyserver.ubuntu.com --recv-keys "$signing_key"
+
+for pkg in "${packages[@]}"; do
+  file="$pkg-$version-1-x86_64.pkg.tar.zst"
+  fetch "$file"
+  fetch "$file.sig"
+  # VALIDSIG's last field is the primary key fingerprint; it must be Omarchy's key.
+  gpg --batch --status-fd 1 --verify "$work/$file.sig" "$work/$file" |
+    awk -v key="$signing_key" '$2 == "VALIDSIG" && $NF ~ key "$" { ok = 1 } END { exit !ok }' || {
+    echo "ledger-gen: bad or missing signature on $file" >&2
+    exit 1
+  }
+  rm -rf "${work:?}/$pkg"
+  mkdir -p "$work/$pkg"
+  bsdtar -xf "$work/$file" -C "$work/$pkg"
+done
+
+{
+  for pkg in "${packages[@]}"; do
+    dir="$work/$pkg"
+    sed -n 's/^backup = //p' "$dir/.PKGINFO" | sort >"$work/$pkg.backup"
+    (cd "$dir" && find . \( -type f -o -type l \) ! -name '.*' -printf '%P\n') | grep -E "$watched" | sort |
+      while IFS= read -r path; do
+        if [[ -L $dir/$path ]]; then
+          sum="symlink:$(readlink "$dir/$path")"
+        else
+          sum=$(sha256sum "$dir/$path" | cut -d' ' -f1)
+        fi
+        backup=no
+        grep -qxF "$path" "$work/$pkg.backup" && backup=yes
+        printf '%s\t%s\t%s\t%s\n' "$path" "$pkg" "$backup" "$sum"
+      done
+  done
+} >"$outdir/files.$version.tsv"
+
+{
+  for pkg in "${packages[@]}"; do
+    echo "### $pkg $version .INSTALL"
+    if [[ -f $work/$pkg/.INSTALL ]]; then
+      cat "$work/$pkg/.INSTALL"
+    else
+      echo "(none)"
+    fi
+    echo
+  done
+} >"$outdir/install.$version.txt"
+
+for pkg in "${packages[@]}"; do
+  awk -v pkg="$pkg" -F ' = ' '$1 ~ /^(depend|conflict|provides|replaces)$/ { printf "%s\t%s\t%s\n", pkg, $1, $2 }' \
+    "$work/$pkg/.PKGINFO"
+done >"$outdir/packages.$version.tsv"
+
+# A migration is privileged when it can change system state: sudo, pkexec, the
+# installer's as_root helper, omarchy-pkg-*, or any omarchy command whose header
+# declares omarchy:requires-sudo=true.
+bindir="$work/omarchy/usr/bin"
+grep -l '^# omarchy:requires-sudo=true' "$bindir"/omarchy-* | xargs -n1 basename | sort >"$work/sudo-commands.txt"
+{
+  for m in "$work/omarchy/usr/share/omarchy/migrations"/*.sh; do
+    name=$(basename "$m")
+    sum=$(sha256sum "$m" | cut -d' ' -f1)
+    privileged=no
+    if grep -qE '\bsudo\b|\bpkexec\b|\bas_root\b|omarchy-pkg-' "$m" ||
+      grep -qwF -f "$work/sudo-commands.txt" "$m"; then
+      privileged=yes
+    fi
+    summary=$(grep -m1 -E '^[[:space:]]*echo ' "$m" | sed -E 's/^[[:space:]]*echo[[:space:]]+//; s/^"//; s/"$//; s/\t/ /g' | cut -c1-120)
+    printf '%s\t%s\t%s\t%s\n' "$name" "$sum" "$privileged" "$summary"
+  done
+} >"$outdir/migrations.$version.tsv"
+
+echo "ledger-gen: wrote files, install, packages and migrations for $version to $outdir" >&2

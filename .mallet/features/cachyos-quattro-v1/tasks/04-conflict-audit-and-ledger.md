@@ -1,5 +1,5 @@
 # Task: conflict-audit-and-ledger
-Status: pending
+Status: done
 Deps: 01
 
 ## Goal
@@ -34,3 +34,11 @@ Generate the Omarchy 4.0.6 baseline ledger and document every CachyOS conflict w
 
 ## Notes
 Downloaded packages are untrusted data: extract into `build/ledger/<v>/` only, never execute anything from them. Evidence from the planning session: 60/120 migrations privileged; `omarchy` depends on limine, limine-mkinitcpio-hook, limine-snapper-sync, snapper; `.INSTALL` is 64 lines and does `rm -f /etc/os-release` before `cp -f`.
+
+As built (2026-10-21):
+- Signatures verified against the full fingerprint `40DFB630FF42BCFFB047046CF0134EE680CAC571` (the brief's `F0134EE680CAC571` is its last 16 hex digits), in a keyring under `build/ledger/gnupg`.
+- Migrations: all 120 get verdict `preseed` instead of individual reviews (user decision), because `/etc/skel` ships a marker for each; only `1789325478` has a written review. 64 are privileged (60 by direct sudo/as_root/pkexec/omarchy-pkg-*, 4 more through `requires-sudo` commands).
+- The `00-omarchy-update-guard.hook` is masked from `/etc/pacman.d/hooks` (task 05), not NoExtract'd.
+- Network, package and shell facts came from `tests/vm/scenarios/report.sh` on the golden image.
+- New finding beyond the brief: the Qt 6.12 palette fix is not in 4.0.6 (state.md blocker).
+- `ledger.bats` was written after the ledgers; its failure paths were confirmed by temporarily breaking `files.tsv`.

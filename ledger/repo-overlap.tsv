@@ -1,0 +1,31 @@
+# Packages in both [omarchy] and the CachyOS/Arch repos (2026-10-21, Omarchy 4.0.6).
+# [omarchy] is the last repo, so pacman installs the CachyOS/Arch build of each; verdict
+# "cachyos" records that this is intended. verify checks the boot packages Packager.
+# package	omarchy_version	cachyos_repo_version	verdict	reason
+brave-bin	1:1.97.59-1	cachyos/brave-bin 1:1.97.59-1	cachyos	either build works; repo order picks CachyOS
+brave-origin-bin	1:1.97.59-1	cachyos/brave-origin-bin 1:1.97.59-1	cachyos	either build works; repo order picks CachyOS
+claude-code	2.1.305-1	cachyos/claude-code 2.1.304-1	cachyos	either build works; repo order picks CachyOS
+claude-desktop	3.1623.0-1	cachyos/claude-desktop 2.42304.2-1	cachyos	either build works; repo order picks CachyOS
+cursor-bin	3.26.13-1	cachyos/cursor-bin 3.25.9-1	cachyos	either build works; repo order picks CachyOS
+ghostty	1.3.1-3	cachyos-extra-v3/ghostty 1.3.1-2.2	cachyos	either build works; repo order picks CachyOS
+ghostty-nautilus	1.3.1-3	cachyos-extra-v3/ghostty-nautilus 1.3.1-2.2	cachyos	either build works; repo order picks CachyOS
+ghostty-shell-integration	1.3.1-3	cachyos-extra-v3/ghostty-shell-integration 1.3.1-2.2	cachyos	either build works; repo order picks CachyOS
+ghostty-terminfo	1.3.1-3	cachyos-extra-v3/ghostty-terminfo 1.3.1-2.2	cachyos	either build works; repo order picks CachyOS
+github-copilot-cli	1.0.101-1	cachyos/github-copilot-cli 1.0.98-1	cachyos	either build works; repo order picks CachyOS
+helium-browser-bin	0.19.4.1-1	cachyos/helium-browser-bin 0.19.4.1-1	cachyos	either build works; repo order picks CachyOS
+heroic-games-launcher-bin	2.22.4-1	cachyos/heroic-games-launcher-bin 2.22.1-2	cachyos	either build works; repo order picks CachyOS
+lib32-nvidia-580xx-utils	580.178.04-1.1	cachyos/lib32-nvidia-580xx-utils 580.178.04-1	cachyos	CachyOS owns the NVIDIA driver
+lib32-opencl-nvidia-580xx	580.178.04-1.1	cachyos/lib32-opencl-nvidia-580xx 580.178.04-1	cachyos	CachyOS owns the NVIDIA driver
+libretro-fbneo-git	1:1.0.0.02.r8581.g074bf13-1	cachyos/libretro-fbneo-git 1:1.0.0.02.r8524.gd8c273a-1	cachyos	either build works; repo order picks CachyOS
+limine-mkinitcpio-hook	1.40.0-2	cachyos/limine-mkinitcpio-hook 1.40.0-1	cachyos	boot-critical: must stay CachyOS (Omarchy version is higher, so only repo order keeps it)
+limine-snapper-sync	1.32.1-2	cachyos/limine-snapper-sync 1.32.1-1	cachyos	boot-critical: must stay CachyOS (Omarchy version is higher, so only repo order keeps it)
+localsend	1.18.2-1	cachyos/localsend 1.17.0-4	cachyos	either build works; repo order picks CachyOS
+nvidia-580xx-dkms	580.178.04-1.1	cachyos/nvidia-580xx-dkms 580.178.04-1	cachyos	CachyOS owns the NVIDIA driver
+nvidia-580xx-utils	580.178.04-1.1	cachyos/nvidia-580xx-utils 580.178.04-1	cachyos	CachyOS owns the NVIDIA driver
+opencl-nvidia-580xx	580.178.04-1.1	cachyos/opencl-nvidia-580xx 580.178.04-1	cachyos	CachyOS owns the NVIDIA driver
+quickshell	0.3.2.r7.g2b4501a-1	cachyos-extra-v3/quickshell 0.3.2-1.1	cachyos	Omarchy 4.0.6 targets packaged quickshell (migration 1787399318); lock/unlock to be checked in VM (task 13)
+sunshine	2026.914.233613-1	cachyos/sunshine 2026.1018.5342-1	cachyos	either build works; repo order picks CachyOS
+walker	2.17.2-1	cachyos/walker 2.17.2-1	cachyos	either build works; repo order picks CachyOS
+xpadneo-dkms	0.10.4-1.1	cachyos/xpadneo-dkms 0.10.5-1	cachyos	either build works; repo order picks CachyOS
+yay	13.0.1-1	cachyos/yay 13.0.1-1	cachyos	either build works; repo order picks CachyOS
+zen-browser-bin	1.23.3b-1	cachyos/zen-browser-bin 1.23.3b-1	cachyos	either build works; repo order picks CachyOS
