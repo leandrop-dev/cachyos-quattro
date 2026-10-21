@@ -49,7 +49,8 @@ A QEMU window opens on the live ISO. Run the installer with:
   passphrase `cq-test-passphrase`.
 - **Boot loader:** Limine.
 - **Desktop:** No Desktop.
-- **User:** name `tester`, any password, with administrator rights.
+- **User:** name `tester`, password `tester`, with administrator rights. The `shell-ui`
+  scenario types this password to log in and to unlock the screen.
 
 When the installer finishes, power the VM off, not reboot, so it doesn't boot the ISO again.
 
@@ -73,7 +74,7 @@ CachyOS enables ufw with incoming connections denied, so SSH needs the explicit 
 For golden images made from now on, also add
 `echo 'Defaults:tester verifypw=any' | sudo tee /etc/sudoers.d/11-tester-verifypw`: without it,
 `sudo -v` (which `omarchy-update` runs) asks for a password, because the stock `%wheel` rule
-is not NOPASSWD. The current images get it from the `uninstall` scenario instead.
+is not NOPASSWD. The current images get it from `tests/vm/guest/install-omarchy.sh` instead.
 
 From the host, in the repository root, install the harness key (it asks for the
 `tester` password once). `ssh-copy-id` needs `~/.ssh` to exist on the host:

@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Install tools
         run: pacman -Syu --noconfirm --needed git github-cli curl gnupg libarchive diffutils
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Look for a release newer than the reviewed one
         id: check
         run: |
@@ -50,7 +50,7 @@ jobs:
           tools/upstream-diff ledger "build/watch/$reviewed" "build/watch/$NEW" >report.md
       - name: Keep the full report
         if: steps.check.outputs.version != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: review-report
           path: report.md
@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: Install tools
         run: pacman -Syu --noconfirm --needed git github-cli
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Look for a pre-release newer than the reviewed release
         id: check
         env:
@@ -95,7 +95,7 @@ jobs:
           tools/upstream-early build/omarchy "v$REVIEWED" "$TAG" >early.md
       - name: Keep the full early warning
         if: steps.check.outputs.tag != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: early-warning
           path: early.md

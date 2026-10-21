@@ -12,6 +12,8 @@ OVMF_VARS=/usr/share/edk2/x64/OVMF_VARS.4m.fd
 SSH_KEY="$IMAGES_DIR/id_ed25519"
 VM_USER=tester
 LUKS_PASSPHRASE=cq-test-passphrase
+# The golden images' login password for $VM_USER (docs/testing.md).
+VM_PASSWORD=tester
 
 vm_die() {
   echo "vm: $*" >&2
@@ -184,4 +186,10 @@ vm_unlock_and_wait() {
     vm_wait_ssh "$port" 60 && return 0
   done
   return 1
+}
+
+# vm_screendump <socket> <file.png>: save the guest's screen as PNG.
+vm_screendump() {
+  vm_qmp "$1" "{\"execute\":\"screendump\",\"arguments\":{\"filename\":\"$2\",\"format\":\"png\"}}"
+  [[ -s $2 ]]
 }

@@ -69,10 +69,19 @@ cache_pkg() {
   (cd "$tree" && bsdtar --zstd -cf "$FAKE_CACHE/$file" .PKGINFO "${@%%/*}")
 }
 
-@test "a path the ledger reviewed passes" {
+@test "a path the ledger allows passes" {
+  cache_pkg omarchy-settings-9.9.9-1-any.pkg.tar.zst etc/modprobe.d/omarchy-usb-autosuspend.conf
+  run "$TXN_CHECK" <<<$'omarchy-settings\netc/modprobe.d/\netc/modprobe.d/omarchy-usb-autosuspend.conf'
+  [ "$status" -eq 0 ]
+}
+
+# pacman leaves NoExtract'd paths out of Path hook targets (hostile-release VM scenario), so a
+# noextract path arriving here means the NoExtract drop-in is not in effect.
+@test "a noextract path among the targets aborts: NoExtract is not in effect" {
   cache_pkg omarchy-settings-9.9.9-1-any.pkg.tar.zst etc/mkinitcpio.conf.d/omarchy_hooks.conf
   run "$TXN_CHECK" <<<$'omarchy-settings\netc/mkinitcpio.conf.d/\netc/mkinitcpio.conf.d/omarchy_hooks.conf'
-  [ "$status" -eq 0 ]
+  [ "$status" -eq 1 ]
+  [[ $output == *"etc/mkinitcpio.conf.d/omarchy_hooks.conf (package omarchy-settings) is NoExtract in the ledger, but pacman would install it"* ]]
 }
 
 @test "a new Omarchy drop-in aborts the transaction" {

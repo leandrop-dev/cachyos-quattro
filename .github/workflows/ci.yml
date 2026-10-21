@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Install tools
         run: pacman -Syu --noconfirm --needed bats shellcheck actionlint make git diffutils
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The CLI refuses to run as root, as on a real system, so the tests run as a normal user.
       - name: Lint and test
         run: |
