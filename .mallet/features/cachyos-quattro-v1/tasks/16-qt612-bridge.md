@@ -1,5 +1,5 @@
 # Task: qt612-bridge
-Status: pending
+Status: done
 Deps: 10
 
 ## Goal
@@ -23,3 +23,8 @@ Pin `import QtQuick 6.11` in the Omarchy shell while omarchy is older than 4.5.0
 
 ## Notes
 Root cause, from juliankgp's README (line 25) and upstream #14553: Qt 6.12 adds a `QtQuick.Color` type that shadows the shell's `qs.Commons` `Color` singleton. A versioned import hides types added after that version. Upstream's fix (`b83d3df0`, in v4.5.0-rc1) qualifies every reference as `Commons.Color`; once omarchy 4.5.0 is installed its files replace the pinned ones and the bridge stops. The bridge edits files the `omarchy` package owns; that is the accepted cost (state.md, 2026-10-21).
+
+Result (2026-10-21): closed at step 1 without code; Omarchy 4.0.6 is not affected.
+- Reproduction on a kept `limine-luks` overlay after `cachyos-quattro install` (`qt6-declarative 6.12.0-1.1`, `quickshell 0.3.2-1.1`, `omarchy 4.0.6-1`): QMP screendumps of the desktop, the Omarchy menu (`omarchy-menu summon`) and the lock screen (`omarchy-system-lock`) all show Tokyo Night colours; the user journal has 0 shell lines matching `undefined|QColor|TypeError|ReferenceError`.
+- Why: Qt 6.12.0 does register `QtQuick/Color 6.12` (`/usr/lib/qt6/qml/QtQuick/plugins.qmltypes`), but the 4.0.6 shell already qualifies every reference as `Commons.Color.…` (40 QML files; e.g. `shell/Commons/Style.qml:117`). The planning-time blocker rested on `b83d3df0` not being an ancestor of `v4.0.6`; the same qualification reached 4.0.x by another commit, which also explains why the 4.0.4 backport #15265 was closed.
+- Upstream's other Qt 6.12 change, `51717f10` ("Patch all QtQuick imports to 6.11 to work around plugin Color bug", 4.5 only), adds a load pragma to `shell.qml` for plugin loading; 4.0.6 renders correctly without it. Recheck when 4.5.0 is reviewed (task 12 diff).

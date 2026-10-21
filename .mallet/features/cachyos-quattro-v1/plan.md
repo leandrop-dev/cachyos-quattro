@@ -42,7 +42,7 @@ Every runtime script honours `CQ_ROOT` (default empty) as a path prefix so unit 
 - [ ] 13-e2e-vm-validation — run every scenario on both golden images and record results [deps: 03, 11, 16] [parallel: no]
 - [ ] 14-upstream-foreign-base-proposal — draft an upstream opt-out proposal for user review [deps: 13] [parallel: no]
 - [ ] 15-other-bootloaders — systemd-boot and GRUB support (phase 2) [deps: 13] [parallel: no]
-- [ ] 16-qt612-bridge — temporary `import QtQuick 6.11` pin for the Omarchy shell on Qt ≥ 6.12, retiring itself once omarchy ≥ 4.5.0 [deps: 10] [parallel: no]
+- [x] 16-qt612-bridge — closed without code: Omarchy 4.0.6 renders correctly on Qt 6.12.0 (verified in the VM) [deps: 10] [parallel: no]
 
 ## Supporting Skills
 None.
