@@ -1,5 +1,5 @@
 # Task: verify-and-status
-Status: pending
+Status: done
 Deps: 05
 
 ## Goal
@@ -25,11 +25,21 @@ Verify every protection after each transaction and on demand through `cachyos-qu
 5. `make check` passes.
 
 ## TDD Checklist
-- [ ] Write failing test
-- [ ] Confirm test fails (red)
-- [ ] Implement
-- [ ] Confirm test passes (green)
-- [ ] Confirm no regressions
+- [x] Write failing test
+- [x] Confirm test fails (red)
+- [x] Implement
+- [x] Confirm test passes (green)
+- [x] Confirm no regressions
 
 ## Notes
 Baselines are written by `backup` (task 09). The initramfs layout differs with UKI; v1 keeps CachyOS's ENABLE_UKI value, so verify handles both the `/boot/<machine-id>/` initramfs layout and UKI files if the baseline says UKI.
+
+As built (2026-10-21):
+- Effective HOOKS follow `/usr/bin/mkinitcpio`: `mkinitcpio.conf` followed by the `mkinitcpio.conf.d/*.conf` drop-ins in `LC_ALL=C.UTF-8 sort -Vu` order (only `-c` disables drop-ins; CachyOS's Limine setup uses no presets). A unit test pins the version-sort order.
+- `verify --current <hooks|limine|packagers>` prints the current value in baseline format, so `backup` (task 09) records exactly what the checks compare. Boot packages are `limine`, `limine-mkinitcpio-hook`, `limine-snapper-sync` and the owners of `/usr/lib/modules/*/vmlinuz` (`linux-cachyos`, `linux-cachyos-lts` on the golden images).
+- `--hook` prints only FAIL/warn lines and a warning, or "all 12 checks passed"; it skips all checks until `/var/lib/cachyos-quattro/installed` exists (written last by `install`, task 10). Without that, the package's own install transaction and every one before the Include is added reported failures ("error: command failed to execute correctly" in the first VM run).
+- LUKS detection uses the baseline cmdline (`rd.luks.` → `sd-encrypt` + `systemd-cryptsetup` in each initramfs; `cryptdevice=` → `encrypt` + `cryptsetup`). `limine_history/` images are not inspected. With `ENABLE_UKI=yes` the initramfs check warns instead of inspecting.
+- Held migrations are read from each `/home/*/.local/state/cachyos-quattro/held.log` (the gate runs per user) and counted only while the migration's marker is still absent.
+- `lib/cmd-status.sh` defines `cmd_status` for the CLI (task 09 wires it into `bin/cachyos-quattro`); `tests/unit/status.bats` covers it with stubs.
+- VM (`tests/vm/scenarios/verify.sh`), both golden images: all 12 checks pass on the installed state with the real `lsinitcpio` (LUKS: "2 images contain systemd-cryptsetup"), `load_config` (`ENABLE_UKI=no` on stock CachyOS) and `pacman-conf`; the hook reports after a transaction (whole transaction 2.3 s on LUKS including snap-pac); `omarchy_hooks.conf` on disk fails `noextract-absent` and `hooks`; `ID=omarchy` fails `identity`.
+- Found while checking identity: CachyOS's `cachyos-branding` rewrites `/etc/os-release` on `cachyos-hooks` upgrades, so the saved copy can go stale (state.md blocker).

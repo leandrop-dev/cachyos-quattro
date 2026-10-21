@@ -1,0 +1,15 @@
+# Checks every cachyos-quattro protection after each transaction. The zz- prefix sorts
+# after the initramfs and boot-entry hooks (90-mkinitcpio-install, cachyos-*), so the
+# checks see the rebuilt initramfs. A PostTransaction hook cannot abort; on failure it
+# prints a warning to act on before rebooting.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Checking CachyOS protections (cachyos-quattro)...
+When = PostTransaction
+Exec = /usr/lib/cachyos-quattro/verify --hook

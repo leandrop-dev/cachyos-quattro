@@ -1,0 +1,362 @@
+#!/bin/bash
+# Check every cachyos-quattro protection. Runs as root, from the zz-cachyos-quattro-verify
+# PostTransaction hook (--hook) and from `cachyos-quattro status`.
+#
+# Prints one line per check, "ok|FAIL|warn <check>: <detail>", and exits 1 when any check
+# fails. With --hook it prints only failures and warnings, or one line when all pass.
+#
+# Baselines, written by `cachyos-quattro backup` to /var/lib/cachyos-quattro/baseline/:
+#   hooks      effective mkinitcpio HOOKS, one line
+#   limine     TARGET_OS_NAME, ENABLE_UKI, BOOT_ORDER, MAX_SNAPSHOT_ENTRIES as KEY=value
+#   packagers  <package>\t<Packager> for the boot loader and kernel packages
+#   cmdline    the kernel command line
+#
+# --current <hooks|limine|packagers> prints the current value in baseline format, so
+# `backup` records exactly what the checks compare against.
+
+set -uo pipefail
+
+hook_mode=0
+current=
+case ${1:-} in
+--hook) hook_mode=1 ;;
+--current) current=${2:?usage: verify --current <hooks|limine|packagers>} ;;
+"") ;;
+*)
+  echo "usage: verify [--hook | --current <hooks|limine|packagers>]" >&2
+  exit 2
+  ;;
+esac
+
+root=${CQ_ROOT:-}
+lib=$root/var/lib/cachyos-quattro
+baseline=$lib/baseline
+ledger=$root/usr/share/cachyos-quattro/ledger/files.tsv
+pacman_conf=$root/etc/pacman.conf
+
+failed=0
+checks=0
+lines=()
+report() {
+  local status=$1 check=$2
+  shift 2
+  lines+=("$status $check: $*")
+  checks=$((checks + 1))
+  if [[ $status == FAIL ]]; then failed=1; fi
+}
+
+# need <check> <baseline file>: report FAIL and return 1 when the baseline is missing.
+need() {
+  if [[ ! -r $baseline/$2 ]]; then
+    report FAIL "$1" "no baseline $baseline/$2; run cachyos-quattro backup"
+    return 1
+  fi
+}
+
+luks_style() {
+  local cmdline
+  if [[ -r $baseline/cmdline ]]; then
+    cmdline=$(<"$baseline/cmdline")
+  else
+    cmdline=$(<"$root/proc/cmdline")
+  fi
+  if [[ $cmdline == *rd.luks.* ]]; then
+    echo systemd
+  elif [[ $cmdline == *cryptdevice=* ]]; then
+    echo legacy
+  else
+    echo none
+  fi
+}
+
+noextract_paths() {
+  awk -F'\t' '!/^#/ && $2 == "noextract" { print $1 }' "$ledger"
+}
+
+check_pacman_include() {
+  local active path missing=()
+  if ! active=$(pacman-conf --config "$pacman_conf" NoExtract); then
+    report FAIL pacman-include "pacman-conf could not read $pacman_conf"
+    return
+  fi
+  while IFS= read -r path; do
+    grep -qxF -e "$path" <<<"$active" || missing+=("$path")
+  done < <(noextract_paths)
+  if ((${#missing[@]})); then
+    report FAIL pacman-include "pacman does not apply NoExtract to ${missing[*]}; is 'Include = /etc/pacman.d/cachyos-quattro.conf' still under [options] in /etc/pacman.conf?"
+  else
+    report ok pacman-include "all $(noextract_paths | wc -l) NoExtract entries are active"
+  fi
+}
+
+check_noextract_absent() {
+  local path present=()
+  while IFS= read -r path; do
+    if [[ -e $root/$path || -L $root/$path ]]; then present+=("$path"); fi
+  done < <(noextract_paths)
+  if ((${#present[@]})); then
+    report FAIL noextract-absent "on disk: ${present[*]}"
+  else
+    report ok noextract-absent "none of Omarchy's blocked files is on disk"
+  fi
+}
+
+check_guard_mask() {
+  local mask=$root/etc/pacman.d/hooks/00-omarchy-update-guard.hook
+  if [[ -L $mask && $(readlink "$mask") == /dev/null ]]; then
+    report ok guard-mask "Omarchy's pacman update guard is masked"
+  else
+    report FAIL guard-mask "$mask is not a symlink to /dev/null"
+  fi
+}
+
+# mkinitcpio appends the drop-ins to mkinitcpio.conf in `LC_ALL=C.UTF-8 sort -V` order and
+# sources the result (/usr/bin/mkinitcpio, "Source additional configuration files").
+effective_hooks() {
+  (
+    HOOKS=()
+    # shellcheck disable=SC1090,SC1091
+    source "$root/etc/mkinitcpio.conf" || exit 1
+    if [[ -d $root/etc/mkinitcpio.conf.d ]]; then
+      while IFS= read -r conf; do
+        # shellcheck disable=SC1090
+        source "$root/etc/mkinitcpio.conf.d/$conf" || exit 1
+      done < <(find "$root/etc/mkinitcpio.conf.d" -maxdepth 1 -xtype f -name '*.conf' -printf '%f\n' | LC_ALL=C.UTF-8 sort -Vu)
+    fi
+    echo "${HOOKS[*]}"
+  )
+}
+
+check_hooks() {
+  need hooks hooks || return
+  local want have style
+  want=$(<"$baseline/hooks")
+  if ! have=$(effective_hooks); then
+    report FAIL hooks "could not read the mkinitcpio configuration"
+    return
+  fi
+  style=$(luks_style)
+  if [[ $have != "$want" ]]; then
+    report FAIL hooks "HOOKS are ($have), baseline is ($want)"
+  elif [[ $style == systemd && " $have " != *" sd-encrypt "* ]]; then
+    report FAIL hooks "LUKS root (rd.luks) but HOOKS lack sd-encrypt"
+  elif [[ $style == legacy && " $have " != *" encrypt "* ]]; then
+    report FAIL hooks "LUKS root (cryptdevice=) but HOOKS lack encrypt"
+  else
+    report ok hooks "$have"
+  fi
+}
+
+check_initramfs() {
+  local style needle img images=() missing=()
+  style=$(luks_style)
+  if [[ -r $baseline/limine ]] && grep -qx 'ENABLE_UKI=yes' "$baseline/limine"; then
+    report warn initramfs "ENABLE_UKI=yes; unified kernel images are not inspected"
+    return
+  fi
+  for img in "$root"/boot/*/*/initramfs*; do
+    [[ -f $img && $img != */limine_history/* ]] && images+=("$img")
+  done
+  if ((${#images[@]} == 0)); then
+    report FAIL initramfs "no initramfs under $root/boot/<machine-id>/<kernel>/"
+    return
+  fi
+  case $style in
+  systemd) needle=systemd-cryptsetup ;;
+  legacy) needle=cryptsetup ;;
+  *)
+    report ok initramfs "${#images[@]} images; root is not encrypted"
+    return
+    ;;
+  esac
+  for img in "${images[@]}"; do
+    lsinitcpio "$img" | grep -q "$needle" || missing+=("${img#"$root"}")
+  done
+  if ((${#missing[@]})); then
+    report FAIL initramfs "no $needle in ${missing[*]}; the LUKS root would not unlock"
+  else
+    report ok initramfs "${#images[@]} images contain $needle"
+  fi
+}
+
+limine_values() {
+  (
+    unset TARGET_OS_NAME ENABLE_UKI BOOT_ORDER MAX_SNAPSHOT_ENTRIES
+    # shellcheck disable=SC1091
+    source "$root/usr/lib/limine/limine-common-functions" || exit 1
+    load_config >/dev/null || exit 1
+    for key in TARGET_OS_NAME ENABLE_UKI BOOT_ORDER MAX_SNAPSHOT_ENTRIES; do
+      printf '%s=%s\n' "$key" "${!key:-}"
+    done
+  )
+}
+
+check_limine() {
+  need limine limine || return
+  local have diff
+  if ! have=$(limine_values); then
+    report FAIL limine "load_config from limine-mkinitcpio-hook failed"
+    return
+  fi
+  diff=$(diff <(cat "$baseline/limine") <(echo "$have") | sed -n 's/^> //p' | paste -sd ' ')
+  if [[ -n $diff ]]; then
+    report FAIL limine "changed from baseline: $diff"
+  else
+    report ok limine "$(paste -sd ' ' <<<"$have")"
+  fi
+}
+
+check_identity() {
+  local problems=()
+  grep -qx 'ID=cachyos' "$root/etc/os-release" || problems+=("/etc/os-release does not say ID=cachyos")
+  if [[ ! -f $lib/identity/nsswitch.conf ]]; then
+    problems+=("no saved copy $lib/identity/nsswitch.conf")
+  elif ! cmp -s "$lib/identity/nsswitch.conf" "$root/etc/nsswitch.conf"; then
+    problems+=("/etc/nsswitch.conf differs from the saved CachyOS copy")
+  fi
+  if ((${#problems[@]})); then
+    report FAIL identity "$(printf '%s; ' "${problems[@]}")"
+  else
+    report ok identity "ID=cachyos, nsswitch.conf unchanged"
+  fi
+}
+
+check_mirrors() {
+  local list servers problems=() count=0
+  for list in "$root"/etc/pacman.d/mirrorlist "$root"/etc/pacman.d/cachyos-*mirrorlist; do
+    [[ -f $list ]] || continue
+    count=$((count + 1))
+    servers=$(grep -E '^[[:space:]]*Server[[:space:]]*=' "$list")
+    if grep -qi 'omarchy\.org' <<<"$servers"; then
+      problems+=("${list#"$root"} lists an omarchy.org server")
+    fi
+    if (($(grep -c . <<<"$servers") < 2)); then
+      problems+=("${list#"$root"} has fewer than two servers")
+    fi
+  done
+  if ((count == 0)); then
+    report FAIL mirrors "no mirrorlist under /etc/pacman.d"
+  elif ((${#problems[@]})); then
+    report FAIL mirrors "$(printf '%s; ' "${problems[@]}")"
+  else
+    report ok mirrors "$count mirrorlists, CachyOS and Arch servers only"
+  fi
+}
+
+check_repo_order() {
+  local repos last
+  if ! repos=$(pacman-conf --config "$pacman_conf" --repo-list); then
+    report FAIL repo-order "pacman-conf could not read $pacman_conf"
+    return
+  fi
+  last=$(tail -n1 <<<"$repos")
+  if ! grep -qx omarchy <<<"$repos"; then
+    report FAIL repo-order "no [omarchy] repository in pacman.conf"
+  elif [[ $last != omarchy ]]; then
+    report FAIL repo-order "[omarchy] must be the last repository, but [$last] follows it"
+  else
+    report ok repo-order "[omarchy] is the last of $(grep -c . <<<"$repos") repositories"
+  fi
+}
+
+check_boot_packages() {
+  need boot-packages packagers || return
+  local pkg want have problems=()
+  while IFS=$'\t' read -r pkg want; do
+    [[ -n $pkg ]] || continue
+    have=$(pacman -Qi "$pkg" | sed -n 's/^Packager *: //p')
+    if [[ $have != "$want" ]]; then problems+=("$pkg is packaged by '${have:-not installed}', baseline '$want'"); fi
+  done <"$baseline/packagers"
+  if ((${#problems[@]})); then
+    report FAIL boot-packages "$(printf '%s; ' "${problems[@]}")"
+  else
+    report ok boot-packages "$(grep -c . "$baseline/packagers") boot packages from their original packagers"
+  fi
+}
+
+check_no_omarchy_kernel() {
+  if pacman -Qq | grep -qx linux-omarchy; then
+    report FAIL no-omarchy-kernel "linux-omarchy is installed; CachyOS owns the kernel"
+  else
+    report ok no-omarchy-kernel "linux-omarchy is not installed"
+  fi
+}
+
+# The gate runs as each user and logs held migrations in their home directory.
+check_held_migrations() {
+  local log home user name held=() total=0
+  for log in "$root"/home/*/.local/state/cachyos-quattro/held.log; do
+    [[ -f $log ]] || continue
+    home=${log%/.local/state/cachyos-quattro/held.log}
+    user=$(basename "$home")
+    local count=0
+    while IFS= read -r name; do
+      [[ -f $home/.local/state/omarchy/migrations/$name ]] || count=$((count + 1))
+    done < <(awk '$2 == "held" { print $3 }' "$log" | sort -u)
+    if ((count)); then
+      held+=("$count held for $user")
+      total=$((total + count))
+    fi
+  done
+  if ((total)); then
+    report warn held-migrations "$(printf '%s; ' "${held[@]}")run 'cachyos-quattro status' for details"
+  else
+    report ok held-migrations "no held Omarchy migrations"
+  fi
+}
+
+# The packages whose Packager the boot-packages check pins: the boot loader and every
+# package that owns an installed kernel image.
+boot_packages() {
+  printf '%s\n' limine limine-mkinitcpio-hook limine-snapper-sync
+  pacman -Qoq "$root"/usr/lib/modules/*/vmlinuz | sort -u
+}
+
+if [[ -n $current ]]; then
+  case $current in
+  hooks) effective_hooks ;;
+  limine) limine_values ;;
+  packagers)
+    boot_packages | while IFS= read -r pkg; do
+      printf '%s\t%s\n' "$pkg" "$(pacman -Qi "$pkg" | sed -n 's/^Packager *: //p')"
+    done
+    ;;
+  *)
+    echo "verify: unknown baseline '$current'" >&2
+    exit 2
+    ;;
+  esac
+  exit
+fi
+
+# Until `cachyos-quattro install` finishes there are no baselines or Include to check, and
+# every transaction in between (including this package's own) would report failures.
+if ((hook_mode)) && [[ ! -e $lib/installed ]]; then
+  echo "cachyos-quattro: not set up yet (no $lib/installed); run 'cachyos-quattro install'. Checks skipped."
+  exit 0
+fi
+
+check_pacman_include
+check_noextract_absent
+check_guard_mask
+check_hooks
+check_initramfs
+check_limine
+check_identity
+check_mirrors
+check_repo_order
+check_boot_packages
+check_no_omarchy_kernel
+check_held_migrations
+
+if ((hook_mode)); then
+  printf '%s\n' "${lines[@]}" | grep -E '^(FAIL|warn) '
+  if ((failed)); then
+    echo "cachyos-quattro: warning: a CachyOS protection check failed. Fix it before rebooting; see 'cachyos-quattro status'."
+  elif ! printf '%s\n' "${lines[@]}" | grep -q '^warn '; then
+    echo "cachyos-quattro: all $checks checks passed"
+  fi
+else
+  printf '%s\n' "${lines[@]}"
+fi
+exit "$failed"
