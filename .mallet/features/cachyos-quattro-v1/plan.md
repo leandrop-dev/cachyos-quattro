@@ -1,7 +1,7 @@
 # Feature: cachyos-quattro v1
-Status: planning
+Status: done (v1 MVP, 2026-10-21); phase 2 in the roadmap below
 Created: 2026-10-20
-Branch: —
+Branch: one f/<task> branch and PR per task (PRs #1–#17)
 
 ## Goal
 Install Omarchy v4 on an existing CachyOS system and keep CachyOS in charge of the kernel, boot loader, initramfs, pacman mirrors, identity and memory tuning across every later Omarchy release.
@@ -12,17 +12,16 @@ Omarchy v4 ships as the pacman packages `omarchy` and `omarchy-settings` (pkgs.o
 ## Repository layout (decided)
 ```
 bin/cachyos-quattro            CLI entry point (dispatches to lib/cmd-*.sh)
-lib/                           common.sh, detect.sh, ledger.sh, cmd-*.sh
-package/                       PKGBUILD for the cachyos-quattro pacman package
-package/hooks/                 ALPM hooks
-package/libexec/               scripts the hooks and stubs run
-package/stubs/                 /usr/local/bin stubs (incl. omarchy-migrate gate)
-package/pacman.d/              cachyos-quattro.conf (NoExtract drop-in)
-ledger/                        files.tsv, migrations.tsv, packages.tsv, releases.tsv
-tools/                         ledger-gen, upstream-diff (dev/CI only)
+lib/                           common.sh, detect.sh, pacman-conf.sh, cmd-*.sh
+package/                       PKGBUILD for the cachyos-quattro pacman package, stubbed-commands.txt
+package/hooks/                 ALPM hooks (04 txn-check, 05 identity, zz verify)
+package/libexec/               txn-check, restore-identity, migrate-gate, stub, verify
+package/migrations/            reviewed replacement migrations
+ledger/                        reviewed verdicts and the generated *.<release>.* files
+tools/                         ledger-gen, ledger-scan, gen-noextract, upstream-* (dev/CI only)
 tests/unit/                    bats tests; tests/fixtures/ fake roots
-tests/vm/                      QEMU/OVMF harness and golden-image procedure
-docs/                          adr/, conflicts.md, recovery.md, testing.md
+tests/vm/                      QEMU/OVMF harness, golden-image procedure, scenarios
+docs/                          adr/, conflicts.md, recovery.md, testing.md, reviewing-a-release.md, hardware-test.md
 ```
 Every runtime script honours `CQ_ROOT` (default empty) as a path prefix so unit tests run against fixture roots.
 
@@ -40,9 +39,18 @@ Every runtime script honours `CQ_ROOT` (default empty) as a path prefix so unit 
 - [x] 11-cli-update-uninstall-recover — update wrapper, uninstall and recovery docs [deps: 10] [parallel: no]
 - [x] 12-upstream-watch-ci — scheduled job diffing new Omarchy releases against the ledger [deps: 04] [parallel: yes]
 - [x] 13-e2e-vm-validation — run every scenario on both golden images and record results [deps: 03, 11, 16] [parallel: no]
-- [ ] 14-upstream-foreign-base-proposal — draft an upstream opt-out proposal for user review [deps: 13] [parallel: no]
-- [ ] 15-other-bootloaders — systemd-boot and GRUB support (phase 2) [deps: 13] [parallel: no]
 - [x] 16-qt612-bridge — closed without code: Omarchy 4.0.6 renders correctly on Qt 6.12.0 (verified in the VM) [deps: 10] [parallel: no]
+
+## Next for v1
+- [ ] Real-hardware run with the user present, following docs/hardware-test.md: the step before recommending v1 to others.
+
+## Roadmap (phase 2)
+Not part of v1. Each item becomes a task when picked up.
+- [ ] 14-upstream-foreign-base-proposal — draft an upstream opt-out proposal for user review (task file kept).
+- [ ] 15-other-bootloaders — systemd-boot and GRUB support (task file kept).
+- [ ] Keep the saved identity current: refresh `/var/lib/cachyos-quattro/identity/os-release` when CachyOS's `cachyos-branding` rewrites `/etc/os-release` (state.md).
+- [ ] Make the repository public, then add the `main` ruleset (state.md).
+- [ ] Review Omarchy 4.5 when it ships stable (issue #16: 84 new migrations, 45 privileged).
 
 ## Supporting Skills
 None.

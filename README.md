@@ -7,7 +7,8 @@ CachyOS owns everything underneath it, across every later Omarchy release.
 
 > **Status: tested in virtual machines only.** Every command passes on CachyOS VMs
 > ([docs/testing.md](docs/testing.md)); it has not yet run on real hardware. Try it on a
-> machine you can restore, and keep the backup it makes.
+> machine you can restore, keep the backup it makes, and follow
+> [docs/hardware-test.md](docs/hardware-test.md).
 
 ## Scope of v1
 
@@ -64,6 +65,16 @@ root file system, so typing them prints why they are blocked and what to do inst
 `omarchy-hibernation-remove`, `omarchy-system-factory-reset`, `omarchy-reinstall-configs`,
 and `omarchy-snapshot restore` (`create` works). The full list of conflicts is in
 [docs/conflicts.md](docs/conflicts.md).
+
+## Roadmap
+
+v1 is complete in the scope above. Next:
+
+- a first run on real hardware ([docs/hardware-test.md](docs/hardware-test.md));
+- systemd-boot and GRUB;
+- a proposal to Omarchy for supported installs on other distributions' base systems;
+- keeping the saved CachyOS `os-release` current when CachyOS changes its branding;
+- the review of Omarchy 4.5 when it ships as stable.
 
 ## Credits
 
