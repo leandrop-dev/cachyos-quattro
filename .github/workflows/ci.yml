@@ -16,5 +16,9 @@ jobs:
       - name: Install tools
         run: pacman -Syu --noconfirm --needed bats shellcheck make git diffutils
       - uses: actions/checkout@v4
+      # The CLI refuses to run as root, as on a real system, so the tests run as a normal user.
       - name: Lint and test
-        run: make check
+        run: |
+          useradd -m builder
+          chown -R builder .
+          su builder -c 'make check'

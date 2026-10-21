@@ -1,0 +1,47 @@
+#!/bin/bash
+# cachyos-quattro: install Omarchy on CachyOS while CachyOS keeps the kernel, boot loader,
+# initramfs, pacman configuration and system identity. Run it as your user from a checkout
+# of this repository; it calls sudo where it needs root.
+
+set -euo pipefail
+
+CQ_REPO=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+export CQ_REPO
+# shellcheck source=lib/common.sh
+source "$CQ_REPO/lib/common.sh"
+# shellcheck source=lib/detect.sh
+source "$CQ_REPO/lib/detect.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: cachyos-quattro <command>
+
+  preflight   check that this system is supported; changes nothing
+  backup      snapshot, back up /boot and key /etc files, record baselines
+  install     install Omarchy with the CachyOS protections
+  status      run every protection check and show held migrations
+  update      update Omarchy and re-check the protections
+  uninstall   remove Omarchy and restore the CachyOS configuration
+  recover     restore /boot and /etc from a backup (from the CachyOS live ISO)
+  help        show this help
+EOF
+}
+
+((EUID != 0)) || cq_die "run as your user, not as root; it calls sudo where needed"
+
+cmd=${1:-help}
+(($#)) && shift
+case $cmd in
+help | -h | --help) usage ;;
+preflight | backup | install | status | update | uninstall | recover)
+  file=$CQ_REPO/lib/cmd-$cmd.sh
+  [[ -f $file ]] || cq_die "'$cmd' is not available yet"
+  # shellcheck source=/dev/null
+  source "$file"
+  "cmd_$cmd" "$@"
+  ;;
+*)
+  usage >&2
+  exit 2
+  ;;
+esac

@@ -1,5 +1,5 @@
 # Task: cli-preflight-backup
-Status: pending
+Status: done
 Deps: 02
 
 ## Goal
@@ -29,12 +29,21 @@ Add the CLI skeleton with system detection, a refusing preflight and a backup th
 8. `make check` passes.
 
 ## TDD Checklist
-- [ ] Write failing tests
-- [ ] Confirm tests fail (red)
-- [ ] Implement
-- [ ] Confirm tests pass (green)
-- [ ] Confirm no regressions
+- [x] Write failing tests
+- [x] Confirm tests fail (red)
+- [x] Implement
+- [x] Confirm tests pass (green)
+- [x] Confirm no regressions
 
 ## Notes
 Fish is CachyOS's default shell; the CLI is Bash and is invoked as `./bin/cachyos-quattro`, so it does not depend on the login shell. Avoid heredocs in any instructions printed for the user to paste into fish.
 - Write the baselines with `sudo /usr/lib/cachyos-quattro/verify --current hooks|limine|packagers` (task 08) instead of recomputing them, and copy `/proc/cmdline` to `baseline/cmdline`. Formats: `hooks` one line; `limine` `KEY=value` for TARGET_OS_NAME, ENABLE_UKI, BOOT_ORDER, MAX_SNAPSHOT_ENTRIES; `packagers` `<package>\t<Packager>`. Wire `lib/cmd-status.sh` (`cmd_status`) into the dispatcher.
+
+As built (2026-10-21):
+- `sudo true` instead of `sudo -v`: with sudoers' default `verifypw=all`, `-v` asks for a password unless every matching entry is NOPASSWD, so it failed on the golden images (NOPASSWD user rule plus the stock `%wheel` rule). `sudo true` prompts and caches the same way for a normal user.
+- Reads under `/boot` go through `sudo test`: the golden images mount the ESP `umask=0077` (`tests/fixtures/*/etc/fstab`), so the user cannot see `/boot/limine.conf`. `findmnt -no SOURCE --nofsroot /` strips the `[/@]` subvolume suffix before `lsblk -s`.
+- preflight reads effective HOOKS with the repository's `package/libexec/verify --current hooks`, because the package is not installed yet; backup writes the baselines with the same script under sudo. It reports every failed requirement, not only the first.
+- backup: the manifest is `manifest.sha256` (sha256sum format, `sha256sum -c` verifies it); `missing.txt` lists skipped paths; `etc.tar` excludes `etc/pacman.d/gnupg` (pacman's local signing key does not belong in a user-readable backup); the backup directory is mode 700; `backups/latest` links to the newest; the baselines are also copied into the backup directory; backup refuses when os-release is not `ID=cachyos`.
+- `bin/cachyos-quattro` dispatches to `lib/cmd-<name>.sh` and says "'<name>' is not available yet" for commands whose task has not landed. `status` is wired (task 08).
+- `tests/unit/fakes.bash` is a shared fake system (sudo, pacman, findmnt, lsblk, bootctl, snapper, curl, df, systemctl, load_config) for the CLI tests.
+- VM (`tests/vm/scenarios/preflight-backup.sh`), both golden images: root refused; preflight passes; backup creates snapper snapshot "cachyos-quattro pre-install", a 286 MB `boot.tar` (kernels, initramfs, limine_history), a verifying manifest and no keyring in `etc.tar`; with the guard package installed, verify passes all 12 checks against backup's baselines; status runs.
