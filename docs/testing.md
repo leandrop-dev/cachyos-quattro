@@ -122,3 +122,5 @@ on success too.
 | 2026-10-21 | none (guard package 0.1.0-1 only) | 260809 | limine-plain | guard-package | pass |
 | 2026-10-21 | none (fake omarchy-settings from a local repo) | 260809 | limine-plain | txn-check | pass |
 | 2026-10-21 | none (guard package with migration gate) | 260809 | limine-plain | guard-package | pass |
+| 2026-10-21 | none (guard package with verify hook) | 260809 | limine-luks | verify | pass |
+| 2026-10-21 | none (guard package with verify hook) | 260809 | limine-plain | verify | pass |

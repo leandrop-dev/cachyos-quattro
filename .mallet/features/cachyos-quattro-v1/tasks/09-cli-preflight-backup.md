@@ -37,3 +37,4 @@ Add the CLI skeleton with system detection, a refusing preflight and a backup th
 
 ## Notes
 Fish is CachyOS's default shell; the CLI is Bash and is invoked as `./bin/cachyos-quattro`, so it does not depend on the login shell. Avoid heredocs in any instructions printed for the user to paste into fish.
+- Write the baselines with `sudo /usr/lib/cachyos-quattro/verify --current hooks|limine|packagers` (task 08) instead of recomputing them, and copy `/proc/cmdline` to `baseline/cmdline`. Formats: `hooks` one line; `limine` `KEY=value` for TARGET_OS_NAME, ENABLE_UKI, BOOT_ORDER, MAX_SNAPSHOT_ENTRIES; `packagers` `<package>\t<Packager>`. Wire `lib/cmd-status.sh` (`cmd_status`) into the dispatcher.

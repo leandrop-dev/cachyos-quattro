@@ -28,7 +28,7 @@ package() {
   ln -s /dev/null "$pkgdir/etc/pacman.d/hooks/00-omarchy-update-guard.hook"
 
   install -Dm644 "$startdir"/hooks/*.hook -t "$pkgdir/usr/share/libalpm/hooks/"
-  install -Dm755 "$startdir"/libexec/{migrate-gate,restore-identity,stub,txn-check} -t "$pkgdir/usr/lib/cachyos-quattro/"
+  install -Dm755 "$startdir"/libexec/{migrate-gate,restore-identity,stub,txn-check,verify} -t "$pkgdir/usr/lib/cachyos-quattro/"
 
   install -d "$pkgdir/usr/local/bin"
   while read -r name; do
