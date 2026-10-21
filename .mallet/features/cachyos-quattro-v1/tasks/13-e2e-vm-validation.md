@@ -24,3 +24,4 @@ Prove every protection and command end to end on the Limine-LUKS and Limine-plai
 
 ## Notes
 Nothing in this task touches a real machine. The real-hardware run (Limine ± LUKS) happens only after all scenarios pass, with the user present, and is not part of this task.
+- Shell screendumps work on the harness's default `-vga std`: Hyprland and `quickshell -p /usr/share/omarchy/shell` run there (task 16). From SSH, load the session environment first (`. /usr/share/omarchy/default/bash/env-bootstrap; export XDG_RUNTIME_DIR=/run/user/1000 WAYLAND_DISPLAY=wayland-1 HYPRLAND_INSTANCE_SIGNATURE=$(ls /run/user/1000/hypr | head -1)`), then `omarchy-menu summon` and `omarchy-system-lock`; capture with QMP `{"execute":"screendump","arguments":{"filename":"<f>.png","format":"png"}}` (QEMU 11.1). The LUKS image autologins, so the session is up after unlock.
