@@ -124,3 +124,5 @@ on success too.
 | 2026-10-21 | none (guard package with migration gate) | 260809 | limine-plain | guard-package | pass |
 | 2026-10-21 | none (guard package with verify hook) | 260809 | limine-luks | verify | pass |
 | 2026-10-21 | none (guard package with verify hook) | 260809 | limine-plain | verify | pass |
+| 2026-10-21 | none (CLI preflight, backup, status) | 260809 | limine-luks | preflight-backup | pass |
+| 2026-10-21 | none (CLI preflight, backup, status) | 260809 | limine-plain | preflight-backup | pass |
