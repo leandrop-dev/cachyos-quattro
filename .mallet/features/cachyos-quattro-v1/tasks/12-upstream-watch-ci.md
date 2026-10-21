@@ -40,3 +40,4 @@ As built (2026-10-21):
 - Tests that named 4.0.6 now read the reviewed release from `ledger/releases.tsv` (`reviewed_release` in `helpers.bash`), so a release review does not edit tests.
 - `upstream-issue`'s tests were written after the tool (TDD order not followed there); the other tools' tests failed first.
 - Step 6 (the first `workflow_dispatch` run) waits for the merge and the user's confirmation: it will open "Early warning: Omarchy v4.5.0-rc1" on the repository.
+- The first push of the workflow was rejected by GitHub ("workflow file issue"): `run: tools/upstream-issue "Early warning: Omarchy $TAG" …` is a plain YAML scalar containing ": ". `actionlint` (installed with the user's approval) found it; `make lint` and CI now run `actionlint` on every workflow.
