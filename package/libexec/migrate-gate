@@ -1,0 +1,193 @@
+#!/bin/bash
+# Installed as /usr/local/bin/omarchy-migrate, ahead of Omarchy's /usr/bin/omarchy-migrate
+# in PATH, so `omarchy update` and the login-time migration notifier run this instead.
+# It runs pending Omarchy migrations the way upstream's loop does, after looking each one
+# up in the cachyos-quattro ledger by name and sha256:
+#   run      reviewed; runs as shipped
+#   replace  reviewed; runs /usr/share/cachyos-quattro/migrations/<name> instead
+#   skip     reviewed; marked done without running
+#   held     never run and never marked, so it stays pending until reviewed: a reviewed
+#            name whose sha256 changed, or an unreviewed migration that can change system
+#            state (sudo, pkexec, as_root, omarchy-pkg-*, or a requires-sudo helper)
+# Unreviewed migrations that cannot change system state run, as upstream would run them.
+#
+# The gate runs migrations itself instead of calling upstream with a filtered
+# OMARCHY_PATH: migration 1786098807 links "$OMARCHY_PATH/default/..." into the home
+# directory, which would leave links into a deleted temporary directory.
+
+set -euo pipefail
+
+mode=run
+
+usage() {
+  echo "Usage: omarchy-migrate [--pending|--status]"
+}
+
+while (($#)); do
+  case "$1" in
+  --pending | --check)
+    mode=pending
+    shift
+    ;;
+  --status)
+    mode=status
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "Unknown option: $1" >&2
+    exit 1
+    ;;
+  esac
+done
+
+OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+STATE_DIR="${OMARCHY_MIGRATION_STATE:-$HOME/.local/state/omarchy/migrations}"
+MIGRATIONS_DIR="$OMARCHY_PATH/migrations"
+share=${CQ_ROOT:-}/usr/share/cachyos-quattro
+ledger=$share/ledger/migrations.tsv
+held_log=$HOME/.local/state/cachyos-quattro/held.log
+
+[[ -r $ledger ]] || {
+  echo "cachyos-quattro: cannot read $ledger; no Omarchy migrations were run." >&2
+  exit 1
+}
+
+# Omarchy commands whose header declares they need root.
+sudo_commands=
+if [[ -d $OMARCHY_PATH/bin ]]; then
+  for cmd in "$OMARCHY_PATH"/bin/omarchy-*; do
+    if [[ -f $cmd ]] && grep -qx '# omarchy:requires-sudo=true' "$cmd"; then
+      sudo_commands+=$(basename "$cmd")$'\n'
+    fi
+  done
+fi
+
+privileged() {
+  [[ -d $OMARCHY_PATH/bin ]] || return 0
+  grep -qE '\bsudo\b|\bpkexec\b|\bas_root\b|omarchy-pkg-' "$1" && return 0
+  [[ -n $sudo_commands ]] && grep -qwF -f <(printf '%s' "$sudo_commands") "$1"
+}
+
+# classify <name> <file>: print "<verdict>\t<reason>".
+classify() {
+  local name=$1 file=$2 sum row reviewed_sum verdict
+  sum=$(sha256sum "$file" | cut -d' ' -f1)
+  row=$(awk -F'\t' -v n="$name" '$1 == n { print $2 "\t" $3; exit }' "$ledger")
+  if [[ -n $row ]]; then
+    IFS=$'\t' read -r reviewed_sum verdict <<<"$row"
+    if [[ $verdict != preseed ]]; then
+      if [[ $reviewed_sum != "$sum" ]]; then
+        printf 'held\tchanged since it was reviewed\n'
+      elif [[ $verdict == replace && ! -f $share/migrations/$name ]]; then
+        printf 'held\treviewed as replace, but %s is missing\n' "$share/migrations/$name"
+      elif [[ $verdict == run || $verdict == skip || $verdict == replace ]]; then
+        printf '%s\treviewed\n' "$verdict"
+      else
+        printf 'held\tunknown verdict %s\n' "$verdict"
+      fi
+      return
+    fi
+  fi
+  if privileged "$file"; then
+    printf 'held\tunreviewed and can change system state\n'
+  else
+    printf 'run\tunreviewed, user-level only\n'
+  fi
+}
+
+# Pending migrations as "<name>\t<file>\t<verdict>\t<reason>".
+pending_entries() {
+  [[ -d $MIGRATIONS_DIR ]] || return 0
+  local file name
+  for file in "$MIGRATIONS_DIR"/*.sh; do
+    [[ -f $file ]] || continue
+    name=$(basename "$file")
+    [[ -f $STATE_DIR/$name ]] && continue
+    printf '%s\t%s\t%s\n' "$name" "$file" "$(classify "$name" "$file")"
+  done
+}
+
+entries=$(pending_entries)
+
+if [[ $mode == status ]]; then
+  [[ -z $entries ]] || cut -f1,3,4 <<<"$entries"
+  exit 0
+fi
+
+if [[ $mode == pending ]]; then
+  runnable=$(awk -F'\t' '$3 != "held" { print $1 }' <<<"$entries")
+  awk -F'\t' '$3 == "held" { print "held: " $1 }' <<<"$entries" >&2
+  if [[ -n $runnable ]]; then
+    printf '%s\n' "$runnable"
+    exit 0
+  fi
+  exit 1
+fi
+
+wait_for_pacman_transaction() {
+  local lock_file=/var/lib/pacman/db.lck
+
+  [[ -e $lock_file ]] || return 0
+  echo "Waiting for pacman transaction to finish before running Omarchy migrations..."
+
+  for _ in {1..900}; do
+    [[ -e $lock_file ]] || return 0
+    sleep 1
+  done
+
+  echo "Pacman transaction is still running; Omarchy migrations will retry on next login."
+  exit 0
+}
+
+wait_for_pacman_transaction
+
+log_held() {
+  local name=$1 file=$2 reason=$3 sum
+  sum=$(sha256sum "$file" | cut -d' ' -f1)
+  mkdir -p "$(dirname "$held_log")"
+  if [[ ! -f $held_log ]] || ! grep -qF "held $name $sum " "$held_log"; then
+    printf '%s held %s %s %s\n' "$(date -Is)" "$name" "$sum" "$reason" >>"$held_log"
+  fi
+}
+
+mkdir -p "$STATE_DIR"
+held=()
+while IFS=$'\t' read -r name file verdict reason <&3; do
+  [[ -n $name ]] || continue
+  marker=$STATE_DIR/$name
+  case $verdict in
+  run) script=$file ;;
+  replace) script=$share/migrations/$name ;;
+  skip)
+    echo "Skipping migration (${name%.sh}): reviewed as not for CachyOS"
+    touch "$marker"
+    continue
+    ;;
+  *)
+    held+=("$name")
+    log_held "$name" "$file" "$reason"
+    continue
+    ;;
+  esac
+  echo -e "\e[32m\nRunning migration (${name%.sh})\e[0m"
+  OMARCHY_PATH="$OMARCHY_PATH" bash -euo pipefail "$script" 3<&-
+  touch "$marker"
+done 3<<<"$entries"
+
+if ((${#held[@]})); then
+  echo "cachyos-quattro: held ${#held[@]} Omarchy migration(s) that change system files and are not reviewed: ${held[*]}" >&2
+  echo "cachyos-quattro: they stay pending; details in $held_log" >&2
+  if [[ -n ${DBUS_SESSION_BUS_ADDRESS:-} ]] && command -v notify-send >/dev/null; then
+    notify-send "cachyos-quattro held ${#held[@]} Omarchy migration(s)" \
+      "They change system files and are not reviewed yet. Details: $held_log" || true
+  fi
+fi
+
+# As upstream: clear a login-time notification once migrations have run.
+if command -v omarchy-notification-dismiss >/dev/null; then
+  omarchy-notification-dismiss "Omarchy Migrations" >/dev/null || true
+fi
