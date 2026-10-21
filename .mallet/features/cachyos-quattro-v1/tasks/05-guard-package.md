@@ -1,5 +1,5 @@
 # Task: guard-package
-Status: pending
+Status: done
 Deps: 02, 04
 
 ## Goal
@@ -23,11 +23,19 @@ Build the cachyos-quattro pacman package with the NoExtract drop-in, the pacman-
 9. `cd package && makepkg -f` builds; `namcap` (if installed) reports no errors; `make check` passes.
 
 ## TDD Checklist
-- [ ] Write failing tests (identity, stubs, noextract)
-- [ ] Confirm tests fail (red)
-- [ ] Implement
-- [ ] Confirm tests pass (green)
-- [ ] Confirm no regressions
+- [x] Write failing tests (identity, stubs, noextract)
+- [x] Confirm tests fail (red)
+- [x] Implement
+- [x] Confirm tests pass (green)
+- [x] Confirm no regressions
 
 ## Notes
 Verified during planning: `Include` inside `[options]` accumulates NoExtract entries (`pacman-conf` test). The etc-overrides source files under `usr/share/omarchy/etc-overrides/` must never be NoExtract'd, because `.INSTALL` runs `rm -f /etc/os-release` before `cp -f`. Stubs are UX; Omarchy calls some commands by absolute path (`omarchy-refresh-sddm` → `$OMARCHY_PATH/bin/omarchy-plymouth-set`), which the stubs do not intercept by design.
+
+As built (2026-10-21):
+- Stub list lives in `package/stubbed-commands.txt` (read by the PKGBUILD and `stubs.bats`). Step 4 corrected after checking `build/ledger/4.0.6`: `omarchy-version-channel` only prints the channel, so the stub covers `omarchy-channel-set` (which calls `omarchy-refresh-pacman`) instead; `omarchy-refresh-plymouth` was added from the brief's never-run list. `omarchy-snapshot` is a branch in the same `stub` script, not a separate wrapper: only `restore` is refused.
+- `tools/ledger-gen` now also writes `ledger/commands.<v>.tsv` (every `omarchy-*` command and whether it declares `requires-sudo`), so the stubs test checks names against the ledger. Regenerating 4.0.6 left every existing ledger file unchanged.
+- The `omarchy` router resolves commands to `$OMARCHY_BIN_DIR/<binary>` and execs that path (`bin/omarchy` lines 951–1045), so `omarchy channel set` and menu entries bypass the stubs, as the ADR expects.
+- pacman refuses to start when an `Include` names a missing file, glob or not (`pacman-conf` 7.1.0: "config file ... could not be read", "error parsing"). Removing the package while the Include remains therefore stops pacman instead of letting Omarchy's files in; `pre_remove` warns, and task 11 removes the Include first.
+- `depends` gained `diffutils` (`cmp`) and `grep`. `namcap` is not installed on the dev machine, so step 9's namcap check was not run.
+- `tests/vm/scenarios/guard-package.sh` installs the host-built package on a golden image: scriptlet output with and without the Include, `pacman-conf NoExtract`, the guard-hook mask, stub resolution in the user PATH and under sudo, and the dangling-Include behaviour on removal.

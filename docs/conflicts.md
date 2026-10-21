@@ -6,7 +6,7 @@ from ISO **260809** (No Desktop, btrfs, Limine, with and without LUKS; the golde
 [testing.md](testing.md)).
 
 The machine-readable verdicts live in `ledger/`; this page explains them. Generated inputs
-(`ledger/*.4.0.6.*`) come from `tools/ledger-gen 4.0.6 ledger`.
+(`ledger/*.4.0.6.*`, including the `commands.4.0.6.tsv` command list) come from `tools/ledger-gen 4.0.6 ledger`.
 
 **Ownership rule.** CachyOS owns the kernel and its command line, the boot loader, the
 initramfs, pacman configuration and mirrors, system identity, and system tuning that
@@ -31,7 +31,7 @@ sets; otherwise it is installed (`ledger/files.tsv`).
 | 11 | Migration `1789325478` | `migrations/1789325478.sh` | installs `linux-omarchy`, deletes `BOOT_ORDER` in `/etc/default/limine`, makes `linux-omarchy` first | never pending on a fresh install (`/etc/skel` marker); install also creates the machine-wide marker `/var/lib/omarchy/migrations/1789325478`, which makes it exit early |
 | 12 | Migrations in later releases | `bin/omarchy-migrate` runs every unmarked migration | unknown | gate holds unreviewed privileged migrations (task 07); CI diff (task 12) |
 | 13 | Install steps that write boot, initramfs or pacman config | `ledger/install-steps.tsv` | `config/snapper.sh` (retention 50/15 → 5), `hardware/nvidia.sh` (second NVIDIA driver), `post-install/pacman.sh` and `hardware/pacman.sh` (pacman.conf; the latter adds a repo with `SigLevel = Never` on T2 Macs), cmdline drop-ins (`intel/fred.sh`, two ASUS display fixes), `MODULES=(…)` overwrites (Surface, Apple SPI), `apple/fix-t2.sh` | skipped (10 of 50 scripts) |
-| 14 | Commands that rewrite boot, pacman or identity | `bin/omarchy-{refresh-limine,refresh-pacman,version-channel,upgrade-to-quattro,setup-direct-boot,hibernation-setup,hibernation-remove,system-factory-reset,reinstall-configs}`, `omarchy-snapshot restore` | rewrite `limine.conf`, `pacman.conf`, mirrorlist, cmdline | `/usr/local/bin` stubs that refuse (task 05) |
+| 14 | Commands that rewrite boot, pacman, the initramfs or the root layout | `bin/omarchy-{refresh-limine,refresh-pacman,channel-set,upgrade-to-quattro,setup-direct-boot,hibernation-setup,hibernation-remove,system-factory-reset,reinstall-configs,refresh-plymouth}`, `omarchy-snapshot restore` (`ledger/commands.4.0.6.tsv`; `omarchy-version-channel` only reads) | rewrite `limine.conf`, `pacman.conf`, mirrorlist, cmdline, fstab; rebuild the initramfs | `/usr/local/bin` stubs that refuse (`package/stubbed-commands.txt`); the `omarchy` router runs commands by absolute path and is not caught |
 | 15 | `tldr` vs `tealdeer` | golden image: `tealdeer` provides and conflicts with `tldr`, required by `cachyos-fish-config` | base package transaction aborts | `ledger/base-packages-exclude.txt` |
 | 16 | **Qt 6.12 palette collision** | fix #14553 (`b83d3df0`, 2026-10-08) is not an ancestor of `v4.0.6`; its 4.0.4 backport #15265 was closed unmerged; CachyOS and Arch `extra` ship `qt6-declarative` 6.12.0 | shell surfaces lose their colours (reported by juliankgp on CachyOS) | **open** — see state.md blockers |
 

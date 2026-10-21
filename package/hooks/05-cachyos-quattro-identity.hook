@@ -1,0 +1,15 @@
+# omarchy-settings' .INSTALL replaces /etc/os-release and /etc/nsswitch.conf on every
+# install and upgrade. The 05- prefix sorts this hook before the initramfs and
+# boot-entry hooks (60-*, 80-limine-efi-deploy, 90-mkinitcpio-install), which name
+# boot entries from os-release.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = omarchy-settings
+Target = omarchy-settings-dev
+
+[Action]
+Description = Restoring CachyOS os-release and nsswitch.conf...
+When = PostTransaction
+Exec = /usr/lib/cachyos-quattro/restore-identity

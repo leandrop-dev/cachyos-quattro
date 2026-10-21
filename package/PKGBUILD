@@ -1,0 +1,40 @@
+# Maintainer: Leandro Paixão
+# Built from a checkout of this repository: cd package && makepkg -si
+# The sources are the repository itself, so there is no source array.
+
+pkgname=cachyos-quattro
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Keeps CachyOS in charge of boot, initramfs, pacman and system identity under Omarchy'
+arch=(any)
+url='https://github.com/leandrop-dev/cachyos-quattro'
+license=(MIT)
+depends=(bash coreutils diffutils grep pacman)
+backup=(etc/pacman.d/cachyos-quattro.conf)
+install=cachyos-quattro.install
+
+build() {
+  "$startdir/../tools/gen-noextract" "$startdir/../ledger/files.tsv" >"$srcdir/cachyos-quattro.conf"
+}
+
+package() {
+  local repo=$startdir/..
+  local name
+
+  install -Dm644 "$srcdir/cachyos-quattro.conf" "$pkgdir/etc/pacman.d/cachyos-quattro.conf"
+
+  # alpm-hooks(5): a /dev/null symlink in the higher-priority hook directory masks a hook.
+  install -d "$pkgdir/etc/pacman.d/hooks"
+  ln -s /dev/null "$pkgdir/etc/pacman.d/hooks/00-omarchy-update-guard.hook"
+
+  install -Dm644 "$startdir/hooks/05-cachyos-quattro-identity.hook" -t "$pkgdir/usr/share/libalpm/hooks/"
+  install -Dm755 "$startdir/libexec/restore-identity" "$startdir/libexec/stub" -t "$pkgdir/usr/lib/cachyos-quattro/"
+
+  install -d "$pkgdir/usr/local/bin"
+  while read -r name; do
+    ln -s /usr/lib/cachyos-quattro/stub "$pkgdir/usr/local/bin/$name"
+  done < <(grep -v '^#' "$startdir/stubbed-commands.txt")
+
+  install -Dm644 "$repo"/ledger/*.tsv -t "$pkgdir/usr/share/cachyos-quattro/ledger/"
+  install -Dm644 "$repo/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

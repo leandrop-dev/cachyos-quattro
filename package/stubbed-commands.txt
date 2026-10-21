@@ -1,0 +1,13 @@
+# Omarchy commands the package shadows with /usr/local/bin/<name> -> /usr/lib/cachyos-quattro/stub.
+# Each needs a case entry in package/libexec/stub.
+omarchy-refresh-limine
+omarchy-refresh-pacman
+omarchy-channel-set
+omarchy-upgrade-to-quattro
+omarchy-setup-direct-boot
+omarchy-hibernation-setup
+omarchy-hibernation-remove
+omarchy-system-factory-reset
+omarchy-reinstall-configs
+omarchy-refresh-plymouth
+omarchy-snapshot

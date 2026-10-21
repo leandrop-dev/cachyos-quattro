@@ -1,0 +1,36 @@
+# shellcheck shell=sh
+# The package never edits /etc/pacman.conf; `cachyos-quattro install` adds the Include.
+# Report whether pacman reads every NoExtract entry from the drop-in.
+
+_cq_report() {
+  active=$(pacman-conf NoExtract)
+  missing=0
+  while read -r key _ path; do
+    [ "$key" = NoExtract ] || continue
+    printf '%s\n' "$active" | grep -qxF "$path" || missing=1
+  done </etc/pacman.d/cachyos-quattro.conf
+  if [ "$missing" = 0 ]; then
+    echo "cachyos-quattro: pacman reads /etc/pacman.d/cachyos-quattro.conf; Omarchy's boot and initramfs files will not be installed."
+  else
+    echo "cachyos-quattro: warning: pacman does not read /etc/pacman.d/cachyos-quattro.conf yet, so Omarchy's boot and initramfs files would be installed."
+    echo "cachyos-quattro: run 'cachyos-quattro install', or add this line under [options] in /etc/pacman.conf:"
+    echo "    Include = /etc/pacman.d/cachyos-quattro.conf"
+  fi
+}
+
+post_install() {
+  _cq_report
+}
+
+post_upgrade() {
+  _cq_report
+}
+
+# pacman refuses to start while an Include names a missing file, so removing the package
+# alone leaves pacman stopped instead of installing Omarchy's files unprotected.
+pre_remove() {
+  if grep -qE '^[[:space:]]*Include[[:space:]]*=[[:space:]]*/etc/pacman.d/cachyos-quattro.conf[[:space:]]*$' /etc/pacman.conf; then
+    echo "cachyos-quattro: warning: /etc/pacman.conf still includes /etc/pacman.d/cachyos-quattro.conf."
+    echo "cachyos-quattro: pacman will refuse to run until that line is removed. 'cachyos-quattro uninstall' does both in the right order."
+  fi
+}

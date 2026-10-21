@@ -1,0 +1,24 @@
+#!/bin/bash
+# Put back CachyOS's /etc/os-release and /etc/nsswitch.conf after omarchy-settings'
+# .INSTALL replaces them. Runs from the 05-cachyos-quattro-identity PostTransaction
+# hook, before the initramfs and boot-entry hooks read os-release.
+# `cachyos-quattro install` saves the copies in /var/lib/cachyos-quattro/identity/.
+
+set -euo pipefail
+
+root=${CQ_ROOT:-}
+saved=$root/var/lib/cachyos-quattro/identity
+log=$root/var/log/cachyos-quattro.log
+
+for file in etc/os-release etc/nsswitch.conf; do
+  copy=$saved/$(basename "$file")
+  if [[ ! -f $copy ]]; then
+    echo "cachyos-quattro: warning: no saved copy of $file in $saved; left as is" >&2
+    continue
+  fi
+  cmp -s "$copy" "$root/$file" && continue
+  install -m 0644 "$copy" "$root/$file"
+  mkdir -p "$(dirname "$log")"
+  printf '%s restore-identity: restored %s\n' "$(date -Is)" "$file" >>"$log"
+  echo "cachyos-quattro: restored $file"
+done
