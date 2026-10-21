@@ -59,10 +59,6 @@ omarchy-reinstall-configs)
   why="it copies /etc/skel over your home directory, then runs omarchy-refresh-limine and omarchy-refresh-plymouth."
   instead="Reset a single config with: omarchy-refresh-config <config-path>"
   ;;
-omarchy-refresh-plymouth)
-  why="it rebuilds the initramfs, which CachyOS owns."
-  instead="omarchy-settings already sets the omarchy Plymouth theme; it takes effect at the next initramfs rebuild."
-  ;;
 omarchy-snapshot)
   why="it runs limine-snapper-restore without checking which snapshot the system booted."
   instead="Boot the snapshot you want from the Snapshots entry in the Limine menu, then run: sudo limine-snapper-restore"

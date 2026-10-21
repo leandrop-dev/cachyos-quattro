@@ -1,6 +1,6 @@
 # Task: e2e-vm-validation
 Status: pending
-Deps: 03, 11
+Deps: 03, 11, 16
 
 ## Goal
 Prove every protection and command end to end on the Limine-LUKS and Limine-plain golden images and record the results.
