@@ -32,7 +32,7 @@
 - 2026-10-21: [firm] `omarchy-refresh-plymouth` is not stubbed (ADR 0001 item 5): with `omarchy_hooks.conf` NoExtract'd it rebuilds with CachyOS's HOOKS through `limine-mkinitcpio`, and theme switching reaches `omarchy-plymouth-set` by absolute path anyway. The brief's never-run listing predates the protections. User agreed.
 - 2026-10-21: [firm] Qt 6.12: option (a) as a self-retiring bridge in its own task (16), after reproducing the black surfaces in the VM. (b) rejected: #14553 touches 74 files and `git apply --check` fails on almost every shell file of v4.0.6. (c) alone blocks v1 with no date (v4.5.0-rc1 has the fix; pkgs.omarchy.org serves 4.0.6). Task 10 does not wait for it. User agreed.
 
-- 2026-10-21: [firm] Qt 6.12 needs no bridge for 4.0.6: the shell already qualifies `Commons.Color`, and VM screendumps on qt6-declarative 6.12.0 show correct colours in the desktop, menu and lock screen (task 16 notes). Supersedes the option (a) decision above.
+- 2026-10-21: [firm] Qt 6.12 needs no bridge for 4.0.6: #14553 was cherry-picked into v4.0.5 (`bfac6650`), so the shell qualifies `Commons.Color`, and VM screendumps on qt6-declarative 6.12.0 show correct colours in the desktop, menu and lock screen (task 16 notes). Supersedes the option (a) decision above.
 
 ## Blockers
 <!-- - [ ] <description> (check off when resolved) -->
