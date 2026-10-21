@@ -70,7 +70,7 @@ setup() {
   [[ $output == *"FAIL Omarchy is already installed"* ]]
   [[ $output == *"FAIL no snapper config named root"* ]]
   [[ $output == *"FAIL only 4 GiB free on /"* ]]
-  [[ $output == *"FAIL https://pkgs.omarchy.org/x86_64/omarchy.db is not reachable"* ]]
+  [[ $output == *"FAIL https://pkgs.omarchy.org/stable/x86_64/omarchy.db is not reachable"* ]]
 }
 
 @test "a non-btrfs root refuses" {

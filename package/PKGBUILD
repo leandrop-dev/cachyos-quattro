@@ -12,6 +12,8 @@ license=(MIT)
 depends=(bash coreutils diffutils grep libarchive pacman)
 backup=(etc/pacman.d/cachyos-quattro.conf)
 install=cachyos-quattro.install
+# Scripts and data only: nothing to strip, no debug package.
+options=(!strip !debug)
 
 build() {
   "$startdir/../tools/gen-noextract" "$startdir/../ledger/files.tsv" >"$srcdir/cachyos-quattro.conf"

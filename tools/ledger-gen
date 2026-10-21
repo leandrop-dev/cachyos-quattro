@@ -21,7 +21,8 @@ set -euo pipefail
 }
 version=$1
 outdir=$(mkdir -p "$2" && cd "$2" && pwd)
-repo_url=https://pkgs.omarchy.org/x86_64
+# The stable channel, as in Omarchy's default/pacman/pacman-stable.conf.
+repo_url=https://pkgs.omarchy.org/stable/x86_64
 signing_key=40DFB630FF42BCFFB047046CF0134EE680CAC571
 packages=(omarchy omarchy-settings)
 # Paths a CachyOS system cares about; everything else is desktop payload.
