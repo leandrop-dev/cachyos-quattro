@@ -9,7 +9,7 @@ pkgdesc='Keeps CachyOS in charge of boot, initramfs, pacman and system identity 
 arch=(any)
 url='https://github.com/leandrop-dev/cachyos-quattro'
 license=(MIT)
-depends=(bash coreutils diffutils grep pacman)
+depends=(bash coreutils diffutils grep libarchive pacman)
 backup=(etc/pacman.d/cachyos-quattro.conf)
 install=cachyos-quattro.install
 
@@ -27,8 +27,8 @@ package() {
   install -d "$pkgdir/etc/pacman.d/hooks"
   ln -s /dev/null "$pkgdir/etc/pacman.d/hooks/00-omarchy-update-guard.hook"
 
-  install -Dm644 "$startdir/hooks/05-cachyos-quattro-identity.hook" -t "$pkgdir/usr/share/libalpm/hooks/"
-  install -Dm755 "$startdir/libexec/restore-identity" "$startdir/libexec/stub" -t "$pkgdir/usr/lib/cachyos-quattro/"
+  install -Dm644 "$startdir"/hooks/*.hook -t "$pkgdir/usr/share/libalpm/hooks/"
+  install -Dm755 "$startdir"/libexec/{restore-identity,stub,txn-check} -t "$pkgdir/usr/lib/cachyos-quattro/"
 
   install -d "$pkgdir/usr/local/bin"
   while read -r name; do

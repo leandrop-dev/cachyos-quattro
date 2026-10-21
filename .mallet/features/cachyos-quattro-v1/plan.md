@@ -32,7 +32,7 @@ Every runtime script honours `CQ_ROOT` (default empty) as a path prefix so unit 
 - [x] 03-vm-harness — QEMU/OVMF golden images (Limine ± LUKS) and a disposable-overlay test runner [deps: 01] [parallel: yes]
 - [x] 04-conflict-audit-and-ledger — ledger generator, 4.0.6 baseline ledger and docs/conflicts.md [deps: 01] [parallel: yes]
 - [x] 05-guard-package — PKGBUILD with NoExtract drop-in, guard-hook mask, identity restore hook and stubs [deps: 02, 04] [parallel: no]
-- [ ] 06-transaction-check — fail-closed PreTransaction check for unreviewed boot-sensitive files [deps: 05] [parallel: no]
+- [x] 06-transaction-check — fail-closed PreTransaction check for unreviewed boot-sensitive files [deps: 05] [parallel: no]
 - [ ] 07-migration-gate — omarchy-migrate wrapper that holds unreviewed privileged migrations [deps: 05] [parallel: no]
 - [ ] 08-verify-and-status — post-transaction verification hook and `cachyos-quattro status` [deps: 05] [parallel: no]
 - [ ] 09-cli-preflight-backup — CLI skeleton, system detection, preflight and backup [deps: 02] [parallel: yes]

@@ -1,0 +1,49 @@
+# Aborts a transaction in which an Omarchy package would install a file under a
+# boot-sensitive path that the cachyos-quattro ledger has not reviewed. The Package
+# trigger passes the transaction's package names and the Path triggers pass its
+# boot-sensitive paths; txn-check tells them apart. The 04- prefix sorts before
+# snap-pac's 05-snap-pac-pre, so an aborted transaction leaves no snapshot behind.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Path
+Target = boot/*
+Target = etc/crypttab
+Target = etc/default/limine
+Target = etc/fstab
+Target = etc/kernel/*
+Target = etc/limine-entry-tool.d/*
+Target = etc/mkinitcpio.conf
+Target = etc/mkinitcpio.conf.d/*
+Target = etc/mkinitcpio.d/*
+Target = etc/modprobe.d/*
+Target = etc/os-release
+Target = etc/pacman.conf
+Target = etc/pacman.d/*
+Target = etc/sysctl.d/*
+Target = etc/systemd/system.conf.d/*
+Target = etc/systemd/user.conf.d/*
+Target = etc/systemd/zram-generator.conf
+Target = etc/tmpfiles.d/*
+Target = etc/vconsole.conf
+Target = usr/lib/initcpio/*
+Target = usr/lib/kernel/*
+Target = usr/lib/modprobe.d/*
+Target = usr/lib/os-release
+Target = usr/lib/sysctl.d/*
+Target = usr/lib/systemd/zram-generator.conf.d/*
+Target = usr/lib/tmpfiles.d/*
+Target = usr/share/libalpm/hooks/*
+
+[Action]
+Description = Checking Omarchy files against the cachyos-quattro ledger...
+When = PreTransaction
+Exec = /usr/lib/cachyos-quattro/txn-check
+NeedsTargets
+AbortOnFail

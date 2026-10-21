@@ -1,0 +1,114 @@
+#!/bin/bash
+# PreTransaction hook 04-cachyos-quattro-txn-check: abort when an Omarchy package would
+# install a file under a boot-sensitive path that the ledger has not reviewed. NoExtract
+# lists exact paths, so a renamed or new drop-in would otherwise be installed.
+#
+# stdin (NeedsTargets) holds the transaction's package names, from the hook's Package
+# trigger, and its boot-sensitive paths, from its Path triggers. A package is Omarchy's
+# when pacman installs it from the [omarchy] repo, or when its name starts with omarchy
+# and no repository has it. Its file list comes from its package file in pacman's cache.
+# Whatever cannot be inspected aborts too. CQ_TXN_ALLOW=1 reports and lets it through.
+
+set -euo pipefail
+
+ledger=${CQ_ROOT:-}/usr/share/cachyos-quattro/ledger/files.tsv
+
+say() { echo "cachyos-quattro: $*" >&2; }
+
+input=$(cat)
+
+if [[ ${CQ_TXN_ALLOW:-} == 1 ]]; then
+  CQ_TXN_ALLOW='' "$0" <<<"$input" ||
+    say "warning: CQ_TXN_ALLOW=1 is set, so the transaction continues anyway."
+  exit 0
+fi
+
+names=()
+paths=()
+while IFS= read -r target; do
+  case $target in
+  */) ;; # a directory changes nothing by itself
+  */*) paths+=("$target") ;;
+  ?*) names+=("$target") ;;
+  esac
+done <<<"$input"
+((${#paths[@]})) || exit 0
+
+[[ -r $ledger ]] || {
+  say "cannot read the ledger $ledger; transaction aborted."
+  exit 1
+}
+reviewed=$(grep -v '^#' "$ledger" | cut -f1)
+
+# pacman's own command line, to tell `pacman -U <file>` apart from a sync transaction.
+from_file() {
+  local args arg
+  if [[ -n ${CQ_PACMAN_CMDLINE:-} ]]; then
+    read -r -a args <<<"$CQ_PACMAN_CMDLINE"
+  elif [[ -r /proc/$PPID/cmdline ]]; then
+    mapfile -d '' -t args <"/proc/$PPID/cmdline"
+  else
+    return 0
+  fi
+  for arg in "${args[@]:1}"; do
+    if [[ $arg == --upgrade || $arg =~ ^-[^-]*U ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+problems=0
+problem() {
+  say "$*"
+  problems=1
+}
+
+all_names=$(pacman -Slq)
+omarchy_names=
+if pacman-conf --repo-list | grep -qx omarchy; then
+  omarchy_names=$(pacman -Slq omarchy)
+fi
+
+candidates=()
+for name in "${names[@]}"; do
+  if grep -qxF -e "$name" <<<"$omarchy_names"; then
+    candidates+=("$name")
+  elif [[ $name == omarchy* ]] && ! grep -qxF -e "$name" <<<"$all_names"; then
+    problem "$name is not in any repository, so its files cannot be checked."
+  fi
+done
+
+if ((${#candidates[@]})); then
+  resolved=$(pacman -Sp -dd --noconfirm --print-format '%r|%n|%f' "${candidates[@]}")
+  cachedirs=$(pacman-conf CacheDir)
+  from_file && upgrade_op=1 || upgrade_op=0
+  while IFS='|' read -r repo name file; do
+    [[ $repo == omarchy ]] || continue
+    if ((upgrade_op)); then
+      problem "$name is installed from a file (pacman -U), so its files cannot be checked."
+      continue
+    fi
+    pkgfile=
+    while IFS= read -r dir; do
+      if [[ -f ${dir%/}/$file ]]; then
+        pkgfile=${dir%/}/$file
+        break
+      fi
+    done <<<"$cachedirs"
+    if [[ -z $pkgfile ]]; then
+      problem "$file is not in pacman's cache, so its files cannot be checked."
+      continue
+    fi
+    shipped=$(bsdtar -tf "$pkgfile")
+    for path in "${paths[@]}"; do
+      grep -qxF -e "$path" <<<"$shipped" || continue
+      grep -qxF -e "$path" <<<"$reviewed" || problem "unreviewed Omarchy file $path (package $name)"
+    done
+  done <<<"$resolved"
+fi
+
+((problems)) || exit 0
+say "transaction aborted: the files above are not in the cachyos-quattro ledger."
+say "Review them first; to install anyway: sudo env CQ_TXN_ALLOW=1 pacman ..."
+exit 1
