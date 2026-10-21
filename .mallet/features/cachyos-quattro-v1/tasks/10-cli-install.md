@@ -1,5 +1,5 @@
 # Task: cli-install
-Status: pending
+Status: done
 Deps: 03, 06, 07, 08, 09
 
 ## Goal
@@ -26,13 +26,26 @@ Implement `cachyos-quattro install`, a resumable install of Omarchy v4 that ends
 5. `make check` passes.
 
 ## TDD Checklist
-- [ ] Write failing test (`install-pacman-conf.bats`, VM `install` scenario)
-- [ ] Confirm test fails (red)
-- [ ] Implement
-- [ ] Confirm test passes (green)
-- [ ] Confirm no regressions
+- [x] Write failing test (`install-pacman-conf.bats`, VM `install` scenario)
+- [x] Confirm test fails (red)
+- [x] Implement
+- [x] Confirm test passes (green)
+- [x] Confirm no regressions
 
 ## Notes
 `omarchy update` and plain `pacman -Syu` both stay safe after install: the guard hook is masked, NoExtract/txn-check/identity/verify hooks fire on every transaction, and migrations go through the gate. `--overwrite '/usr/share/omarchy/*'` in `omarchy-update-system-pkgs` does not interact with NoExtract.
 - The transaction check (task 06) aborts any transaction that installs an `[omarchy]` package shipping an unreviewed file under its boot-sensitive paths. In 4.0.6 none of `omarchy-base.packages` does, but the hardware steps `intel/ipu7-camera.sh`, `dell-xps13-ptl-speaker-firmware.sh` and `fix-tuxedo-backlight.sh` install such packages (docs/conflicts.md #17). On matching hardware install stops at that step with the check's message; report it as "needs a ledger review" rather than a generic failure.
 - Write `/var/lib/cachyos-quattro/installed` as the last install step: until it exists the verify hook (task 08) skips its checks, so the transactions during install do not report failures.
+
+As built (2026-10-21):
+- Phases: preflight, backup, guard, pacman-conf, keyring, packages, base-packages, system, user, login, rebuild, done. Step 1.11 (`theme`) was dropped: `install/user/theme.sh` already sets "Tokyo Night" when no theme exists.
+- Each phase runs through `cq_run_phase`: a subshell with errexit, called as a plain statement, its status in `CQ_PHASE_RC`. The first VM run showed why: a phase called as `phase || cq_die` runs with errexit off, so a failed `pacman -S` in base-packages was ignored, the phase was marked done and `config/enable-services.sh` then failed on the missing `cups`. `install.bats` pins the fix.
+- `cq_pacman` retries a transaction twice (10 s apart): the first run's base-packages download got "Connection reset by peer" from pkgs.omarchy.org. Every call uses `--needed`.
+- The repository is Omarchy's stable channel, `Server = https://pkgs.omarchy.org/stable/$arch` (Omarchy's `default/pacman/pacman-stable.conf`); preflight and `tools/ledger-gen` use the same channel. `lib/pacman-conf.sh` adds and removes the two marked blocks; `install-pacman-conf.bats` checks the result with `pacman-conf`.
+- system: the run list comes from Omarchy's own `{config,hardware,login,post-install}/all.sh` in `omarchy-apply-system`'s order, with verdicts from `ledger/install-steps.tsv`; a script the ledger has not reviewed, or any `all.sh` line other than `run_logged "$OMARCHY_INSTALL/..."`, stops the install before any step runs. Steps run as root with the environment `omarchy-apply-system` sets.
+- user: `cp -af /etc/skel/. ~/`, then `omarchy-provision-user --force --first-install` with `OMARCHY_SETUP_CONTEXT=provision-owner`, as upstream's `omarchy-provision-owner` (`finalize_user`) does for an installed machine. The step's "never --first-install" concern applies only to the `runtime` context, where the flag switches to `iso-chroot`; with `provision-owner` it marks the shipped migrations done and sets the theme headless. The machine-wide `1789325478` marker is created; `omarchy-migrate --status` is checked for anything pending.
+- login: as `omarchy-provision-owner`'s `configure_login`: `state.conf` always, `autologin.conf` on LUKS roots only; `login/sddm.sh` itself only edits SDDM's PAM file.
+- packages also installs `omarchy-keyring`; the PKGBUILD sets `options=(!strip !debug)` so `makepkg` on a No Desktop system needs only `fakeroot`, which guard installs when missing.
+- `cmd-install.sh` was written before `install.bats` (TDD order not followed for the phase loop); `install-pacman-conf.bats` was written first and failed first.
+- VM `limine-plain`: install passes (the `omarchy` transaction downloads 423 MB and installs 1 GB, base-packages then finds most packages already present; about 2 minutes on the test network); all 12 checks pass before and after reboot; SDDM shows the greeter on seat0.
+- VM `limine-luks`: install passes; after `limine-mkinitcpio` the LUKS passphrase unlocks the root on the first attempt; all 12 checks pass before and after reboot ("2 images contain systemd-cryptsetup"); SDDM autologins `tester` into a seat0 session.

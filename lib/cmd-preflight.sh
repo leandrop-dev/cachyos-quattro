@@ -2,7 +2,7 @@
 # cachyos-quattro preflight: print what was detected, then refuse unless this is a
 # supported system. Every failed requirement is reported, not just the first.
 
-CQ_OMARCHY_DB=https://pkgs.omarchy.org/x86_64/omarchy.db
+CQ_OMARCHY_DB=https://pkgs.omarchy.org/stable/x86_64/omarchy.db
 CQ_MIN_FREE_GIB=10
 
 cmd_preflight() {
